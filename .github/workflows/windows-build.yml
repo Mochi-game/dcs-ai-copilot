@@ -1,0 +1,62 @@
+name: Windows Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version"
+        required: true
+        default: "0.1.0"
+      buy_me_a_coffee_url:
+        description: "Optional Buy Me a Coffee URL"
+        required: false
+        default: "https://buymeacoffee.com/myriskdashk"
+      require_license:
+        description: "Fail the build unless LICENSE exists"
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Run tests
+        shell: pwsh
+        run: python -m unittest discover -s tests
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Build portable app
+        shell: pwsh
+        run: |
+          $BuildArgs = @(
+            "-Version", "${{ inputs.version }}",
+            "-BuyMeACoffeeUrl", "${{ inputs.buy_me_a_coffee_url }}",
+            "-RequireInstaller"
+          )
+          if ("${{ inputs.require_license }}" -eq "true") {
+            $BuildArgs += "-RequireLicense"
+          }
+          & .\packaging\windows\build_windows.ps1 @BuildArgs
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dcs-ai-copilot-windows-${{ inputs.version }}
+          path: |
+            release/*.exe
+            release/*.zip
+            release/RELEASE_NOTES-*.md
+            packaging/windows/DCS-AI-Copilot.generated.iss

@@ -1,0 +1,33 @@
+# Secrets and local setup
+.env
+.env.*
+!.env.example
+config.local.ini
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.build-venv/
+
+# Runtime output
+.runtime/
+logs/
+kneeboard.html
+
+# Build and release output
+build/
+build-meta/
+dist/
+release/
+*.spec
+packaging/windows/*.generated.iss
+
+# Local editor/OS noise
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini

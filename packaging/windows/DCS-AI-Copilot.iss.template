@@ -1,0 +1,44 @@
+#define MyAppName "DCS AI Copilot"
+#define MyAppVersion "__APP_VERSION__"
+#define MyAppPublisher "__APP_PUBLISHER__"
+#define MyAppExeName "DCS-AI-Copilot.exe"
+
+[Setup]
+AppId=__APP_ID__
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+DefaultDirName={localappdata}\Programs\DCS AI Copilot
+DefaultGroupName=DCS AI Copilot
+DisableProgramGroupPage=yes
+PrivilegesRequired=lowest
+OutputBaseFilename=DCS-AI-Copilot-Setup-{#MyAppVersion}
+OutputDir=..\..\release
+Compression=lzma
+SolidCompression=yes
+WizardStyle=modern
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional icons:"
+
+[Files]
+Source: "..\..\dist\DCS-AI-Copilot\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{group}\DCS AI Copilot"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\First-time Setup"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--setup"
+Name: "{group}\Setup Help"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--setup-help"
+Name: "{group}\Check Installation"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--doctor"
+Name: "{group}\Joystick Diagnostics"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--diagnose-joysticks"
+Name: "{group}\Audio Diagnostics"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--diagnose-audio"
+Name: "{group}\License Help"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--license-help"
+Name: "{group}\Release Check"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--release-check"
+Name: "{group}\Uninstall Help"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--uninstall-help"
+Name: "{group}\Uninstall DCS AI Copilot"; Filename: "{uninstallexe}"
+Name: "{userdesktop}\DCS AI Copilot"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+
+[Run]
+Filename: "{app}\{#MyAppExeName}"; Parameters: "--setup"; Description: "Run first-time setup wizard"; Flags: postinstall nowait skipifsilent
