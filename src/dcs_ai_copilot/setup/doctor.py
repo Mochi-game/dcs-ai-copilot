@@ -9,6 +9,7 @@ from pathlib import Path
 from dcs_ai_copilot.config import AppConfig, load_config
 from dcs_ai_copilot.dcs_bios.discovery import find_reference_dirs
 from dcs_ai_copilot.env import load_env_file
+from dcs_ai_copilot.setup.dcs_bios_help import inspect_dcs_bios_setup
 from dcs_ai_copilot.setup.wizard import DEFAULT_WEB_URL
 from dcs_ai_copilot.voice.audio import list_audio_input_devices
 
@@ -61,9 +62,11 @@ def _check_config(config: AppConfig) -> list[CheckResult]:
         _check_openai_key(),
         _check_gemini_key(config.voice_transcription_fallback_provider),
         _check_dcs_install(config.dcs_install_path),
+        _check_dcs_saved_games(config.dcs_saved_games_path),
         _check_vr_platform(config.vr_platform, config.vr_managed_by_ai_copilot),
         _check_audio_input_device(config.voice_input_device),
         _check_dcs_bios_reference(config.dcs_bios_reference_dir),
+        _check_dcs_bios_export(config.dcs_saved_games_path),
         CheckResult(
             "OpenKneeboard URL",
             "OK",
@@ -125,6 +128,18 @@ def _check_dcs_install(configured_dir: Path | None) -> CheckResult:
 
 def _looks_like_dcs_install(path: Path) -> bool:
     return (path / "bin" / "DCS.exe").exists() or (path / "DCS.exe").exists()
+
+
+def _check_dcs_saved_games(configured_dir: Path | None) -> CheckResult:
+    if configured_dir and configured_dir.exists():
+        return CheckResult("DCS Saved Games path", "OK", str(configured_dir))
+    detail = str(configured_dir) if configured_dir else "not configured"
+    return CheckResult(
+        "DCS Saved Games path",
+        "WARN",
+        detail,
+        "Run setup and enter your Saved Games DCS folder, for example C:\\Users\\YourName\\Saved Games\\DCS.openbeta.",
+    )
 
 
 def _check_vr_platform(platform: str, managed_by_ai_copilot: bool) -> CheckResult:
@@ -203,6 +218,25 @@ def _check_dcs_bios_reference(configured_dir: Path | None) -> CheckResult:
         "WARN",
         "No DCS-BIOS reference JSON folder was found.",
         "Install DCS-BIOS or run setup and point to Saved Games\\DCS...\\Scripts\\DCS-BIOS\\doc\\json.",
+    )
+
+
+def _check_dcs_bios_export(saved_games_path: Path | None) -> CheckResult:
+    status = inspect_dcs_bios_setup(saved_games_path)
+    if status.export_lua_exists and status.export_lua_mentions_dcs_bios:
+        return CheckResult("DCS-BIOS Export.lua", "OK", str(status.export_lua_file))
+    if not status.export_lua_exists:
+        return CheckResult(
+            "DCS-BIOS Export.lua",
+            "WARN",
+            f"Missing: {status.export_lua_file}",
+            "Run DCS-AI-Copilot.exe --dcs-bios-help for exact install steps.",
+        )
+    return CheckResult(
+        "DCS-BIOS Export.lua",
+        "WARN",
+        f"Export.lua exists but does not load DCS-BIOS: {status.export_lua_file}",
+        "Add the DCS-BIOS dofile line shown by DCS-AI-Copilot.exe --dcs-bios-help.",
     )
 
 

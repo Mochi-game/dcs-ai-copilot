@@ -21,6 +21,7 @@ class PackagingTests(unittest.TestCase):
             "logs/",
             "kneeboard.html",
             "*.spec",
+            "packaging/windows/*.generated.iss",
         ):
             self.assertIn(pattern, gitignore)
         self.assertIn("!.env.example", gitignore)
@@ -50,10 +51,12 @@ class PackagingTests(unittest.TestCase):
     def test_user_guide_covers_installer_and_manual_env_setup(self) -> None:
         guide = (ROOT / "docs" / "USER_SETUP_GUIDE.md").read_text(encoding="utf-8")
 
-        self.assertIn("DCS-AI-Copilot-Setup-0.1.0.exe", guide)
+        self.assertIn("DCS-AI-Copilot-Setup-2.0.exe", guide)
         self.assertIn("DCS AI Copilot > First-time Setup", guide)
         self.assertIn(".env.example", guide)
         self.assertIn("DCS AI Copilot > Uninstall DCS AI Copilot", guide)
+        self.assertIn("DCS AI Copilot > DCS-BIOS Setup Help", guide)
+        self.assertTrue((ROOT / "docs" / "DCS_BIOS_SETUP.md").exists())
         self.assertIn("VR platform/headset", guide)
         self.assertIn("does not change OpenXR", guide)
 
@@ -125,6 +128,8 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("__APP_ID__", template)
         self.assertIn("Check Installation", template)
         self.assertIn("--doctor", template)
+        self.assertIn("DCS-BIOS Setup Help", template)
+        self.assertIn("--dcs-bios-help", template)
         self.assertIn("Audio Diagnostics", template)
         self.assertIn("--diagnose-audio", template)
         self.assertIn("License Help", template)
@@ -162,9 +167,9 @@ class PackagingTests(unittest.TestCase):
         checklist = (ROOT / "docs" / "PUBLISHING_CHECKLIST.md").read_text(encoding="utf-8")
 
         self.assertIn("git push -u origin main", checklist)
-        self.assertIn("git tag v0.1.0", checklist)
-        self.assertIn("release\\DCS-AI-Copilot-Setup-0.1.0.exe", checklist)
-        self.assertIn("release\\DCS-AI-Copilot-portable-0.1.0.zip", checklist)
+        self.assertIn("git tag v2.0", checklist)
+        self.assertIn("release\\DCS-AI-Copilot-Setup-2.0.exe", checklist)
+        self.assertIn("release\\DCS-AI-Copilot-portable-2.0.zip", checklist)
         self.assertIn("-RequireInstaller -RequireLicense", checklist)
         self.assertIn("Prepare-GitHub-Release.ps1", checklist)
         self.assertIn("Prepare-Local-Git-Repository.ps1", checklist)
@@ -174,7 +179,7 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("https://buymeacoffee.com/myriskdashk", checklist)
         self.assertIn("Test-Release-Smoke.ps1", checklist)
         self.assertIn("without launching interactive setup", checklist)
-        self.assertIn("git push origin v0.1.1", checklist)
+        self.assertIn("git push origin v3.0", checklist)
 
     def test_portable_installer_scripts_are_user_scoped(self) -> None:
         install_script = (ROOT / "packaging" / "windows" / "Install-DCS-AI-Copilot.ps1").read_text(encoding="utf-8")
@@ -187,6 +192,8 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("First-time setup was not started", install_script)
         self.assertIn("Audio Diagnostics.lnk", install_script)
         self.assertIn("--diagnose-audio", install_script)
+        self.assertIn("DCS-BIOS Setup Help.lnk", install_script)
+        self.assertIn("--dcs-bios-help", install_script)
         self.assertIn("License Help.lnk", install_script)
         self.assertIn("--license-help", install_script)
         self.assertIn("Release Check.lnk", install_script)

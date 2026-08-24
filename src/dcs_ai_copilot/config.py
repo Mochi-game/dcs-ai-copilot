@@ -13,6 +13,7 @@ class AppConfig:
     web_host: str
     web_port: int
     dcs_install_path: Path | None
+    dcs_saved_games_path: Path | None
     vr_platform: str
     vr_managed_by_ai_copilot: bool
     dcs_bios_enabled: bool
@@ -55,6 +56,7 @@ def load_config(config_file: Path) -> AppConfig:
     web_host = parser.get("web", "host", fallback="127.0.0.1")
     web_port = parser.getint("web", "port", fallback=8765)
     dcs_install_path = parser.get("dcs", "install_path", fallback="").strip()
+    dcs_saved_games_path = parser.get("dcs", "saved_games_path", fallback="").strip()
     dcs_bios_reference = parser.get("dcs_bios", "reference_dir", fallback="").strip()
     env_file = _resolve_path(
         project_root,
@@ -70,6 +72,11 @@ def load_config(config_file: Path) -> AppConfig:
         dcs_install_path=(
             _resolve_path(project_root, dcs_install_path)
             if dcs_install_path
+            else None
+        ),
+        dcs_saved_games_path=(
+            _resolve_path(project_root, dcs_saved_games_path)
+            if dcs_saved_games_path
             else None
         ),
         vr_platform=parser.get("vr", "platform", fallback="openxr-other").strip(),

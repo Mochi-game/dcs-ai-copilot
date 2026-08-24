@@ -47,6 +47,7 @@ if (-not $NoStartMenuShortcuts) {
     New-AppShortcut -Path (Join-Path $StartMenuDir "First-time Setup.lnk") -Arguments "--setup"
     New-AppShortcut -Path (Join-Path $StartMenuDir "Setup Help.lnk") -Arguments "--setup-help"
     New-AppShortcut -Path (Join-Path $StartMenuDir "Check Installation.lnk") -Arguments "--doctor"
+    New-AppShortcut -Path (Join-Path $StartMenuDir "DCS-BIOS Setup Help.lnk") -Arguments "--dcs-bios-help"
     New-AppShortcut -Path (Join-Path $StartMenuDir "Joystick Diagnostics.lnk") -Arguments "--diagnose-joysticks"
     New-AppShortcut -Path (Join-Path $StartMenuDir "Audio Diagnostics.lnk") -Arguments "--diagnose-audio"
     New-AppShortcut -Path (Join-Path $StartMenuDir "License Help.lnk") -Arguments "--license-help"

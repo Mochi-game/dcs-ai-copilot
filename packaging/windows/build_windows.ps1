@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.1.0",
+    [string]$Version = "2.0",
     [string]$BuyMeACoffeeUrl = "",
     [string]$Publisher = "Michael Johnlin",
     [string]$AppId = "{{3B6F0F84-7B89-4F6A-88F4-D6D816D78941}}",
@@ -110,6 +110,7 @@ Per-user install without admin:
 
 - DCS-BIOS integration is read-only.
 - No cockpit commands are sent.
+- DCS-BIOS setup help is available with `DCS-AI-Copilot.exe --dcs-bios-help`.
 - No DCS graphics, OpenXR, PimaxXR, QuadViews or Pimax Play settings are changed.
 - No hidden multiplayer/server data is read.
 - License terms are included in `LICENSE` when a final license has been added.

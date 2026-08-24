@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.1.0",
+    [string]$Version = "2.0",
     [Parameter(Mandatory = $true)]
     [string]$BuyMeACoffeeUrl,
     [string]$GitHubUser = "YOUR_GITHUB_USER",

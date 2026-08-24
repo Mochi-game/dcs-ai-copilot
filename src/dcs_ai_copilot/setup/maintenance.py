@@ -89,7 +89,7 @@ def license_help(project_root: Path) -> str:
             "2. Confirm the copyright line is correct for the release owner.",
             "3. Remove or leave LICENSE.template.md only as a helper; do not publish it as the final license.",
             "4. Add your real Buy Me a Coffee URL before the final public build.",
-            "5. Run: python main.py --release-check --release-version 0.1.0",
+            "5. Run: python main.py --release-check --release-version 2.0",
             "",
             "Helpful reference:",
             "https://choosealicense.com/",
@@ -97,7 +97,7 @@ def license_help(project_root: Path) -> str:
     )
 
 
-def run_release_check(project_root: Path, version: str = "0.1.0") -> list[ReleaseCheckResult]:
+def run_release_check(project_root: Path, version: str = "2.0") -> list[ReleaseCheckResult]:
     project_root = project_root.resolve()
     release_root = project_root / "release"
     portable_zip = release_root / f"DCS-AI-Copilot-portable-{version}.zip"
@@ -234,7 +234,7 @@ def _check_release_file(name: str, path: Path) -> ReleaseCheckResult:
         name,
         "FAIL",
         f"Missing or empty: {path}",
-        "Run packaging/windows/build_windows.ps1 -Version 0.1.0 -RequireInstaller.",
+        "Run packaging/windows/build_windows.ps1 -Version 2.0 -RequireInstaller.",
     )
 
 
@@ -250,6 +250,7 @@ def _check_portable_zip(path: Path) -> ReleaseCheckResult:
                 "LICENSE",
                 ".env.example",
                 "README.md",
+                "docs/DCS_BIOS_SETUP.md",
                 "docs/LICENSE_HELP.md",
                 "docs/USER_SETUP_GUIDE.md",
                 "Install-DCS-AI-Copilot.ps1",

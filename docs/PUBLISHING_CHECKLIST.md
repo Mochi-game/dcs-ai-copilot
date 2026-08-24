@@ -11,6 +11,7 @@ Use this before publishing DCS AI Copilot on GitHub.
 - Confirm `.env.example` is included and contains placeholders only.
 - Confirm the app does not modify DCS graphics, OpenXR, PimaxXR, QuadViews or Pimax Play settings.
 - Confirm the app sends no DCS-BIOS cockpit commands.
+- Confirm `DCS-AI-Copilot.exe --dcs-bios-help` explains DCS-BIOS install/repair without editing DCS files.
 - Confirm multiplayer safety statement is visible in README/release notes.
 
 ## License Helper
@@ -27,16 +28,16 @@ DCS AI Copilot currently uses the MIT License in `LICENSE`. The helper explains 
 
 ```powershell
 Set-Location C:\Projects\DCS-AI-Copilot
-.\packaging\windows\build_windows.ps1 -Version "0.1.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk"
+.\packaging\windows\build_windows.ps1 -Version "2.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk"
 ```
 
 Output:
 
 ```text
 dist\DCS-AI-Copilot
-release\DCS-AI-Copilot-Setup-0.1.0.exe
-release\DCS-AI-Copilot-portable-0.1.0.zip
-release\RELEASE_NOTES-0.1.0.md
+release\DCS-AI-Copilot-Setup-2.0.exe
+release\DCS-AI-Copilot-portable-2.0.zip
+release\RELEASE_NOTES-2.0.md
 packaging\windows\DCS-AI-Copilot.generated.iss
 ```
 
@@ -56,13 +57,13 @@ packaging\windows\DCS-AI-Copilot.generated.iss
 For CI or final release builds, require the installer so the build fails if Inno Setup is missing:
 
 ```powershell
-.\packaging\windows\build_windows.ps1 -Version "0.1.0" -RequireInstaller
+.\packaging\windows\build_windows.ps1 -Version "2.0" -RequireInstaller
 ```
 
 For the final public build, also require your real `LICENSE` file:
 
 ```powershell
-.\packaging\windows\build_windows.ps1 -Version "0.1.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk" -RequireInstaller -RequireLicense
+.\packaging\windows\build_windows.ps1 -Version "2.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk" -RequireInstaller -RequireLicense
 ```
 
 The installer should run:
@@ -78,13 +79,13 @@ after installation.
 Run this before commit/tag/release upload:
 
 ```powershell
-python main.py --release-check --release-version 0.1.0
+python main.py --release-check --release-version 2.0
 ```
 
 Or from the built app:
 
 ```powershell
-.\dist\DCS-AI-Copilot\DCS-AI-Copilot.exe --release-check --release-version 0.1.0
+.\dist\DCS-AI-Copilot\DCS-AI-Copilot.exe --release-check --release-version 2.0
 ```
 
 The check fails if required public release inputs are missing, including:
@@ -101,7 +102,7 @@ The check fails if required public release inputs are missing, including:
 After the final build, test the release ZIP and the per-user installer script from a clean temporary folder:
 
 ```powershell
-.\packaging\windows\Test-Release-Smoke.ps1 -Version "0.1.0"
+.\packaging\windows\Test-Release-Smoke.ps1 -Version "2.0"
 ```
 
 The smoke test verifies that the ZIP does not contain `.env`, public helper files are included, the built executable can show help/release-check output, and the portable install/uninstall scripts work without launching interactive setup.
@@ -111,7 +112,7 @@ The smoke test verifies that the ZIP does not contain `.env`, public helper file
 After your real Buy Me a Coffee URL exists, this helper runs tests, builds the installer/ZIP, requires `LICENSE`, runs release-check, then prints the manual GitHub commands:
 
 ```powershell
-.\packaging\windows\Prepare-GitHub-Release.ps1 -Version "0.1.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk" -GitHubUser "YOUR_GITHUB_USER"
+.\packaging\windows\Prepare-GitHub-Release.ps1 -Version "2.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk" -GitHubUser "YOUR_GITHUB_USER"
 ```
 
 It does not run `git push` or create a GitHub release automatically.
@@ -135,25 +136,25 @@ Prepare the local commit and tag. This command sets Git identity only for this r
 
 ```powershell
 Set-Location C:\Projects\DCS-AI-Copilot
-.\packaging\windows\Prepare-Local-Git-Repository.ps1 -Version "0.1.0" -GitUserName "YOUR_GIT_NAME" -GitUserEmail "YOUR_GIT_EMAIL" -GitHubUser "YOUR_GITHUB_USER"
+.\packaging\windows\Prepare-Local-Git-Repository.ps1 -Version "2.0" -GitUserName "YOUR_GIT_NAME" -GitUserEmail "YOUR_GIT_EMAIL" -GitHubUser "YOUR_GITHUB_USER"
 ```
 
 The script refuses to commit `.env`, `.env.*`, `release/`, `dist/`, `build/`, `build-meta/` or `.build-venv/`.
-It also creates the version tag, equivalent to `git tag v0.1.0`.
+It also creates the version tag, equivalent to `git tag v2.0`.
 
 Create an empty GitHub repository named `dcs-ai-copilot`, then push:
 
 ```powershell
 git push -u origin main
-git push origin v0.1.0
+git push origin v2.0
 ```
 
-Then create a GitHub Release for `v0.1.0` and upload:
+Then create a GitHub Release for `v2.0` and upload:
 
 ```text
-release\DCS-AI-Copilot-Setup-0.1.0.exe
-release\DCS-AI-Copilot-portable-0.1.0.zip
-release\RELEASE_NOTES-0.1.0.md
+release\DCS-AI-Copilot-Setup-2.0.exe
+release\DCS-AI-Copilot-portable-2.0.zip
+release\RELEASE_NOTES-2.0.md
 ```
 
 ## GitHub Actions
@@ -171,9 +172,9 @@ For final public release workflow runs, set `require_license` to `true`.
 Automatic GitHub releases are created when a version tag is pushed:
 
 ```powershell
-git tag v0.1.1
+git tag v3.0
 git push origin main
-git push origin v0.1.1
+git push origin v3.0
 ```
 
 Repository or organization Actions permissions must allow read/write access for `GITHUB_TOKEN`.

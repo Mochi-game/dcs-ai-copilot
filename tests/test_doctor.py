@@ -61,6 +61,40 @@ class DoctorTests(unittest.TestCase):
         dcs_result = next(result for result in results if result.name == "DCS World install path")
         self.assertEqual(dcs_result.status, "WARN")
         self.assertIn("Run setup", dcs_result.action)
+        export_result = next(result for result in results if result.name == "DCS-BIOS Export.lua")
+        self.assertEqual(export_result.status, "WARN")
+        self.assertIn("--dcs-bios-help", export_result.action)
+
+    def test_dcs_bios_export_lua_is_ok_when_it_loads_dcs_bios(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            saved_games = root / "Saved Games" / "DCS"
+            (saved_games / "Scripts").mkdir(parents=True)
+            (saved_games / "Scripts" / "Export.lua").write_text(
+                r"dofile(lfs.writedir() .. [[Scripts\DCS-BIOS\BIOS.lua]])",
+                encoding="utf-8",
+            )
+            write_setup_files(
+                root,
+                SetupAnswers(
+                    dcs_install_path="",
+                    dcs_saved_games_path=str(saved_games),
+                    vr_platform="openxr-other",
+                    openai_api_key="",
+                    gemini_api_key="",
+                    keyboard_ptt_key="f13",
+                    joystick_backend="winmm",
+                    joystick_name="Panel",
+                    joystick_button="0",
+                    joystick_winmm_device_id="auto",
+                    input_device="",
+                ),
+            )
+
+            results = run_doctor(root / "config.ini")
+
+        export_result = next(result for result in results if result.name == "DCS-BIOS Export.lua")
+        self.assertEqual(export_result.status, "OK")
 
     def test_dcs_install_path_is_ok_when_dcs_exe_exists(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

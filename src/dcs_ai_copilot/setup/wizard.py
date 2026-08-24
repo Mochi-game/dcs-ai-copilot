@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Callable
 
 from dcs_ai_copilot.setup.maintenance import backup_dcs_saved_games
+from dcs_ai_copilot.setup.dcs_bios_help import format_dcs_bios_setup_help, inspect_dcs_bios_setup
 
 
 DEFAULT_WEB_URL = "http://127.0.0.1:8765"
@@ -253,9 +254,10 @@ def _run_onboarding_loop(
         print_func("Setup help menu")
         print_func("1. Show OpenKneeboard Web Dashboard steps")
         print_func("2. Show PTT/joystick diagnostic steps")
-        print_func("3. Run doctor again")
-        print_func("4. Back up DCS Saved Games now")
-        print_func("5. Finish setup")
+        print_func("3. Show DCS-BIOS setup/repair steps")
+        print_func("4. Run doctor again")
+        print_func("5. Back up DCS Saved Games now")
+        print_func("6. Finish setup")
         choice = _ask(input_func, "Choose", "3")
         print_func("")
 
@@ -264,10 +266,12 @@ def _run_onboarding_loop(
         elif choice == "2":
             print_func(_ptt_steps_text())
         elif choice == "3":
+            print_func(format_dcs_bios_setup_help(inspect_dcs_bios_setup(Path(answers.dcs_saved_games_path))))
+        elif choice == "4":
             from dcs_ai_copilot.setup.doctor import format_doctor_report, run_doctor
 
             print_func(format_doctor_report(run_doctor(project_root / "config.ini")))
-        elif choice == "4":
+        elif choice == "5":
             destination = _ask(input_func, "Backup destination folder", "")
             if not destination:
                 print_func("Backup skipped because no destination was entered.")
@@ -281,7 +285,7 @@ def _run_onboarding_loop(
                     print_func(f"Backup failed: {exc}")
                 else:
                     print_func(f"Backup created: {backup_path}")
-        elif choice == "5":
+        elif choice == "6":
             print_func("Setup finished.")
             return
         else:
@@ -299,7 +303,8 @@ def _next_steps_text() -> str:
             "4. If the microphone is wrong, run: DCS-AI-Copilot.exe --diagnose-audio",
             "5. Gemini fallback is optional. Add GEMINI_API_KEY in .env if you want it.",
             "6. If something is unclear, run: DCS-AI-Copilot.exe --doctor",
-            "7. VR platform is stored for help text only; AI Copilot does not change VR settings.",
+            "7. For DCS-BIOS install/repair steps, run: DCS-AI-Copilot.exe --dcs-bios-help",
+            "8. VR platform is stored for help text only; AI Copilot does not change VR settings.",
         ]
     )
 
@@ -311,6 +316,7 @@ def setup_help_text() -> str:
             _next_steps_text(),
             _openkneeboard_steps_text(),
             _ptt_steps_text(),
+            format_dcs_bios_setup_help(inspect_dcs_bios_setup()),
             _backup_steps_text(),
             _uninstall_steps_text(),
         ]

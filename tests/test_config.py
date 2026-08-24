@@ -34,6 +34,27 @@ class ConfigTests(unittest.TestCase):
             config = load_config(config_file)
 
         self.assertEqual(config.dcs_install_path, dcs_install)
+        self.assertIsNone(config.dcs_saved_games_path)
+
+    def test_load_config_reads_optional_dcs_saved_games_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            saved_games = root / "Saved Games" / "DCS.openbeta"
+            config_file = root / "config.ini"
+            config_file.write_text(
+                "\n".join(
+                    [
+                        "[dcs]",
+                        "install_path =",
+                        f"saved_games_path = {saved_games}",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            config = load_config(config_file)
+
+        self.assertEqual(config.dcs_saved_games_path, saved_games)
 
     def test_load_config_allows_missing_dcs_install_path(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

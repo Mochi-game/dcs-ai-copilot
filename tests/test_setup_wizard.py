@@ -129,6 +129,8 @@ class SetupWizardTests(unittest.TestCase):
 
         self.assertIn("DCS AI Copilot setup help", text)
         self.assertIn("OpenKneeboard setup", text)
+        self.assertIn("DCS-BIOS setup help", text)
+        self.assertIn("--dcs-bios-help", text)
         self.assertIn("PTT setup", text)
         self.assertIn("--backup-dcs", text)
         self.assertIn("Uninstall", text)

@@ -17,7 +17,7 @@ This guide is for Windows users installing DCS AI Copilot for DCS World F/A-18C.
 
 If you downloaded the Windows installer:
 
-1. Run `DCS-AI-Copilot-Setup-0.1.0.exe`.
+1. Run `DCS-AI-Copilot-Setup-2.0.exe`.
 2. Keep the default install folder unless you have a reason to change it:
 
 ```text
@@ -45,8 +45,8 @@ The installer script copies the app to:
 %LOCALAPPDATA%\Programs\DCS AI Copilot
 ```
 
-It also creates Start Menu shortcuts for setup, doctor, joystick diagnostics and uninstall help.
-It also includes `Setup Help`, which prints OpenKneeboard, PTT, backup and uninstall steps without changing your config.
+It also creates Start Menu shortcuts for setup, doctor, DCS-BIOS setup help, joystick diagnostics and uninstall help.
+It also includes `Setup Help`, which prints OpenKneeboard, DCS-BIOS, PTT, backup and uninstall steps without changing your config.
 
 If you are running from source, open PowerShell in the project folder:
 
@@ -79,7 +79,7 @@ Your VR platform is stored in `config.ini` only so help and doctor output can us
 
 If you configure the API keys manually instead, copy `.env.example` to `.env` and fill in `OPENAI_API_KEY`. Fill in `GEMINI_API_KEY` only if you want Gemini fallback. Do not share or commit the real `.env` file.
 
-After writing the files, the wizard keeps helping until you answer that setup is satisfactory. It can show OpenKneeboard steps, PTT diagnostic steps, run doctor again, or help you start a DCS Saved Games backup.
+After writing the files, the wizard keeps helping until you answer that setup is satisfactory. It can show OpenKneeboard steps, DCS-BIOS setup steps, PTT diagnostic steps, run doctor again, or help you start a DCS Saved Games backup.
 
 To see the same post-install help later without rewriting config:
 
@@ -107,12 +107,25 @@ For an installed app, use Start Menu:
 DCS AI Copilot > Check Installation
 ```
 
+To show DCS-BIOS install/repair help:
+
+```powershell
+python main.py --dcs-bios-help
+```
+
+For an installed app, use Start Menu:
+
+```text
+DCS AI Copilot > DCS-BIOS Setup Help
+```
+
 The doctor report checks:
 
 - config file
 - OpenAI API key
 - Python packages
 - DCS-BIOS reference folder
+- DCS-BIOS `Export.lua` status
 - OpenKneeboard install hints
 - DCS World install path
 - VR platform/headset choice
@@ -120,6 +133,45 @@ The doctor report checks:
 - dashboard port `127.0.0.1:8765`
 
 If a line says `FAIL`, follow the `Fix:` line below it. If a line says `WARN`, the app may still run, but the feature may need manual setup.
+
+## DCS-BIOS Setup
+
+DCS AI Copilot uses DCS-BIOS read-only. It sends no cockpit commands.
+
+If DCS-BIOS is missing or cockpit data does not appear, run:
+
+```powershell
+python main.py --dcs-bios-help
+```
+
+For an installed app, use:
+
+```text
+DCS AI Copilot > DCS-BIOS Setup Help
+```
+
+The helper shows:
+
+- your exact DCS Saved Games path
+- whether `Scripts` exists
+- whether `Scripts\DCS-BIOS` exists
+- whether `Scripts\DCS-BIOS\doc\json` exists
+- whether `Scripts\Export.lua` exists
+- whether `Export.lua` loads `Scripts\DCS-BIOS\BIOS.lua`
+
+If the helper says `Export.lua` does not load DCS-BIOS, add this line at the end of `Export.lua`:
+
+```lua
+dofile(lfs.writedir() .. [[Scripts\DCS-BIOS\BIOS.lua]])
+```
+
+Download DCS-BIOS from:
+
+```text
+https://github.com/DCS-Skunkworks/dcs-bios/releases/latest
+```
+
+Download `DCS-BIOS_x.y.z.zip`, extract it, and copy the extracted `DCS-BIOS` folder into your Saved Games `Scripts` folder. AI Copilot does not edit DCS files automatically.
 
 ## Start The App
 

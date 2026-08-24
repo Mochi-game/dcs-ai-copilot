@@ -109,6 +109,12 @@ python main.py --doctor
 `--doctor` visar vad som är OK, vad som saknas, och exakt nästa åtgärd för exempelvis OpenAI API key, OpenKneeboard, DCS-BIOS och Python dependencies.
 Den varnar också om DCS World-installationsmappen saknas eller inte ser ut att innehålla `DCS.exe`.
 
+Visa DCS-BIOS-installationshjälp och lokal status:
+
+```powershell
+python main.py --dcs-bios-help
+```
+
 Lista mikrofoner och andra ljudingångar:
 
 ```powershell
@@ -219,6 +225,14 @@ Dashboarden visar:
 - Master Arm
 - COMM1/COMM2 display
 - COMM1/COMM2 frekvens om DCS-BIOS-reference finns
+
+Om DCS-BIOS saknas eller `Export.lua` inte laddar DCS-BIOS, kör:
+
+```powershell
+DCS-AI-Copilot.exe --dcs-bios-help
+```
+
+Hjälpen visar exakt Saved Games-mapp, `Scripts\DCS-BIOS`, `doc\json` och `Export.lua`-status. Den ändrar inte DCS-filer automatiskt.
 
 ## Rösttranskribering
 
@@ -344,7 +358,7 @@ python main.py --setup-help
 Kontrollera om projektet är redo för publik GitHub-release:
 
 ```powershell
-python main.py --release-check --release-version 0.1.0
+python main.py --release-check --release-version 2.0
 ```
 
 Kontrollen stoppar om exempelvis `LICENSE`, Buy Me a Coffee-länk, releasefiler eller säkerhetstexter saknas.
@@ -370,6 +384,7 @@ Användarguide och publiceringschecklista finns i:
 
 ```text
 docs/USER_SETUP_GUIDE.md
+docs/DCS_BIOS_SETUP.md
 docs/PUBLISHING_CHECKLIST.md
 docs/LICENSE_HELP.md
 ```
@@ -377,33 +392,33 @@ docs/LICENSE_HELP.md
 Kör release-kontrollen innan du taggar eller laddar upp filer:
 
 ```powershell
-DCS-AI-Copilot.exe --release-check --release-version 0.1.0
+DCS-AI-Copilot.exe --release-check --release-version 2.0
 ```
 
 Kör även smoke-test på den byggda ZIP:en och portable-installeraren:
 
 ```powershell
-.\packaging\windows\Test-Release-Smoke.ps1 -Version "0.1.0"
+.\packaging\windows\Test-Release-Smoke.ps1 -Version "2.0"
 ```
 
 När `LICENSE` och Buy Me a Coffee-länk är klara kan final release-helpern köra tester, build och release-check i följd:
 
 ```powershell
-.\packaging\windows\Prepare-GitHub-Release.ps1 -Version "0.1.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk" -GitHubUser "YOUR_GITHUB_USER"
+.\packaging\windows\Prepare-GitHub-Release.ps1 -Version "2.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk" -GitHubUser "YOUR_GITHUB_USER"
 ```
 
 Förbered lokal Git-commit och tagg när GitHub-repot finns:
 
 ```powershell
-.\packaging\windows\Prepare-Local-Git-Repository.ps1 -Version "0.1.0" -GitUserName "YOUR_GIT_NAME" -GitUserEmail "YOUR_GIT_EMAIL" -GitHubUser "YOUR_GITHUB_USER"
+.\packaging\windows\Prepare-Local-Git-Repository.ps1 -Version "2.0" -GitUserName "YOUR_GIT_NAME" -GitUserEmail "YOUR_GIT_EMAIL" -GitHubUser "YOUR_GITHUB_USER"
 ```
 
 När GitHub Actions har `Read and write permissions` kan en ny GitHub Release skapas automatiskt genom att pusha en ny versionstagg:
 
 ```powershell
-git tag v0.1.1
+git tag v3.0
 git push origin main
-git push origin v0.1.1
+git push origin v3.0
 ```
 
 ## Dependencies

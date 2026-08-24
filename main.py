@@ -32,6 +32,7 @@ from dcs_ai_copilot.setup.maintenance import (
     uninstall_help,
 )
 from dcs_ai_copilot.setup.doctor import format_doctor_report, run_doctor
+from dcs_ai_copilot.setup.dcs_bios_help import format_dcs_bios_setup_help, inspect_dcs_bios_setup
 from dcs_ai_copilot.setup.wizard import run_setup_wizard, setup_help_text
 from dcs_ai_copilot.voice.audio import run_audio_diagnostics
 from dcs_ai_copilot.voice.parser import CoordinateParseError, parse_coordinate_message
@@ -51,6 +52,13 @@ def main() -> int:
         return 0
     if args.doctor:
         print(format_doctor_report(run_doctor(user_config_root / "config.ini")))
+        return 0
+    if args.dcs_bios_help:
+        config_file = user_config_root / "config.ini"
+        saved_games_path = None
+        if config_file.exists():
+            saved_games_path = load_config(config_file).dcs_saved_games_path
+        print(format_dcs_bios_setup_help(inspect_dcs_bios_setup(saved_games_path)))
         return 0
     if args.backup_dcs:
         source = Path(args.dcs_saved_games) if args.dcs_saved_games else default_dcs_saved_games_path()
@@ -231,6 +239,11 @@ def parse_args() -> argparse.Namespace:
         help="Check config, dependencies, OpenKneeboard hints and dashboard port.",
     )
     parser.add_argument(
+        "--dcs-bios-help",
+        action="store_true",
+        help="Print DCS-BIOS install/repair steps and local status without changing DCS files.",
+    )
+    parser.add_argument(
         "--backup-dcs",
         metavar="DESTINATION_DIR",
         help="Back up DCS Saved Games configuration to a destination folder.",
@@ -257,7 +270,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--release-version",
-        default="0.1.0",
+        default="2.0",
         help="Release version to check with --release-check.",
     )
     parser.add_argument(

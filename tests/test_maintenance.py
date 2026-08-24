@@ -50,14 +50,14 @@ class MaintenanceTests(unittest.TestCase):
         self.assertIn("currently uses the MIT License", text)
         self.assertIn("LICENSE", text)
         self.assertIn("MIT", text)
-        self.assertIn("python main.py --release-check --release-version 0.1.0", text)
+        self.assertIn("python main.py --release-check --release-version 2.0", text)
 
     def test_release_check_blocks_missing_license_and_donation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             _write_minimal_release_tree(root, buy_me_a_coffee_url="")
 
-            results = run_release_check(root, version="0.1.0")
+            results = run_release_check(root, version="2.0")
             report = format_release_check_report(results)
 
         self.assertEqual(release_check_exit_code(results), 1)
@@ -73,7 +73,7 @@ class MaintenanceTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            results = run_release_check(root, version="0.1.0")
+            results = run_release_check(root, version="2.0")
             report = format_release_check_report(results)
 
         self.assertEqual(release_check_exit_code(results), 0)
@@ -85,7 +85,7 @@ class MaintenanceTests(unittest.TestCase):
             _write_minimal_release_tree(root, buy_me_a_coffee_url="https://buymeacoffee.com/example")
             (root / "LICENSE").write_text("Copyright (c) YEAR AUTHOR\n", encoding="utf-8")
 
-            results = run_release_check(root, version="0.1.0")
+            results = run_release_check(root, version="2.0")
             report = format_release_check_report(results)
 
         self.assertEqual(release_check_exit_code(results), 1)
@@ -109,19 +109,20 @@ def _write_minimal_release_tree(root: Path, buy_me_a_coffee_url: str) -> None:
         "DCS-BIOS read-only. No cockpit commands. No hidden multiplayer data. No local AI.\n",
         encoding="utf-8",
     )
-    (root / "release" / "DCS-AI-Copilot-Setup-0.1.0.exe").write_bytes(b"installer")
-    (root / "release" / "RELEASE_NOTES-0.1.0.md").write_text(
+    (root / "release" / "DCS-AI-Copilot-Setup-2.0.exe").write_bytes(b"installer")
+    (root / "release" / "RELEASE_NOTES-2.0.md").write_text(
         "DCS-BIOS read-only. No cockpit commands. No hidden multiplayer data.\n",
         encoding="utf-8",
     )
     import zipfile
 
-    with zipfile.ZipFile(root / "release" / "DCS-AI-Copilot-portable-0.1.0.zip", "w") as archive:
+    with zipfile.ZipFile(root / "release" / "DCS-AI-Copilot-portable-2.0.zip", "w") as archive:
         for name in (
             "DCS-AI-Copilot.exe",
             "LICENSE",
             ".env.example",
             "README.md",
+            "docs/DCS_BIOS_SETUP.md",
             "docs/LICENSE_HELP.md",
             "docs/USER_SETUP_GUIDE.md",
             "Install-DCS-AI-Copilot.ps1",

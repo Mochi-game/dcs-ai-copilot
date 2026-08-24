@@ -19,13 +19,13 @@ This file is guidance for the release process. It is not legal advice.
 4. Run the release check:
 
 ```powershell
-python main.py --release-check --release-version 0.1.0
+python main.py --release-check --release-version 2.0
 ```
 
 5. Build the final release with license enforcement:
 
 ```powershell
-.\packaging\windows\build_windows.ps1 -Version "0.1.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk" -RequireInstaller -RequireLicense
+.\packaging\windows\build_windows.ps1 -Version "2.0" -BuyMeACoffeeUrl "https://buymeacoffee.com/myriskdashk" -RequireInstaller -RequireLicense
 ```
 
 ## Helper Command
