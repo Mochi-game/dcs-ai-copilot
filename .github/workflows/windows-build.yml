@@ -73,13 +73,13 @@ jobs:
       - name: Build portable app
         shell: pwsh
         run: |
-          $BuildArgs = @(
-            "-Version", "${env:RELEASE_VERSION}",
-            "-BuyMeACoffeeUrl", "${env:BUY_ME_A_COFFEE_URL}",
-            "-RequireInstaller"
-          )
+          $BuildArgs = @{
+            Version = "${env:RELEASE_VERSION}"
+            BuyMeACoffeeUrl = "${env:BUY_ME_A_COFFEE_URL}"
+            RequireInstaller = $true
+          }
           if ("${env:REQUIRE_LICENSE}" -eq "true") {
-            $BuildArgs += "-RequireLicense"
+            $BuildArgs.RequireLicense = $true
           }
           & .\packaging\windows\build_windows.ps1 @BuildArgs
 
