@@ -141,12 +141,18 @@ class PackagingTests(unittest.TestCase):
         workflow = (ROOT / ".github" / "workflows" / "windows-build.yml").read_text(encoding="utf-8")
 
         self.assertIn("workflow_dispatch", workflow)
+        self.assertIn("tags:", workflow)
+        self.assertIn('"v*"', workflow)
+        self.assertIn("contents: write", workflow)
         self.assertIn("build_windows.ps1", workflow)
         self.assertIn("choco install innosetup", workflow)
         self.assertIn("-RequireInstaller", workflow)
         self.assertIn("require_license", workflow)
         self.assertIn('default: true', workflow)
         self.assertIn("-RequireLicense", workflow)
+        self.assertIn("Test-Release-Smoke.ps1", workflow)
+        self.assertIn("softprops/action-gh-release", workflow)
+        self.assertIn("body_path: release/RELEASE_NOTES-${{ env.RELEASE_VERSION }}.md", workflow)
         self.assertIn("https://buymeacoffee.com/myriskdashk", workflow)
         self.assertIn("actions/upload-artifact", workflow)
         self.assertIn("release/*.exe", workflow)
@@ -168,6 +174,7 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("https://buymeacoffee.com/myriskdashk", checklist)
         self.assertIn("Test-Release-Smoke.ps1", checklist)
         self.assertIn("without launching interactive setup", checklist)
+        self.assertIn("git push origin v0.1.1", checklist)
 
     def test_portable_installer_scripts_are_user_scoped(self) -> None:
         install_script = (ROOT / "packaging" / "windows" / "Install-DCS-AI-Copilot.ps1").read_text(encoding="utf-8")

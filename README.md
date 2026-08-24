@@ -398,6 +398,14 @@ Förbered lokal Git-commit och tagg när GitHub-repot finns:
 .\packaging\windows\Prepare-Local-Git-Repository.ps1 -Version "0.1.0" -GitUserName "YOUR_GIT_NAME" -GitUserEmail "YOUR_GIT_EMAIL" -GitHubUser "YOUR_GITHUB_USER"
 ```
 
+När GitHub Actions har `Read and write permissions` kan en ny GitHub Release skapas automatiskt genom att pusha en ny versionstagg:
+
+```powershell
+git tag v0.1.1
+git push origin main
+git push origin v0.1.1
+```
+
 ## Dependencies
 
 Externa Python-paket finns i `requirements.txt`:

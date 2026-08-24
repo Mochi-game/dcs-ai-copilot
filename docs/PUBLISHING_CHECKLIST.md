@@ -168,6 +168,16 @@ The workflow runs tests, builds the portable app, and uploads release artifacts.
 It installs Inno Setup in the Windows runner and uses `-RequireInstaller`, so missing installer output fails the workflow instead of silently publishing only a ZIP.
 For final public release workflow runs, set `require_license` to `true`.
 
+Automatic GitHub releases are created when a version tag is pushed:
+
+```powershell
+git tag v0.1.1
+git push origin main
+git push origin v0.1.1
+```
+
+Repository or organization Actions permissions must allow read/write access for `GITHUB_TOKEN`.
+
 ## Known Limitations For Early Release
 
 - DCS-BIOS is read-only.
