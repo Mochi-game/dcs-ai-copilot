@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "2.0",
+    [string]$Version = "2.1.0",
     [string]$BuyMeACoffeeUrl = "",
     [string]$Publisher = "Michael Johnlin",
     [string]$AppId = "{{3B6F0F84-7B89-4F6A-88F4-D6D816D78941}}",

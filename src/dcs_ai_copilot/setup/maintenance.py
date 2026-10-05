@@ -97,7 +97,7 @@ def license_help(project_root: Path) -> str:
     )
 
 
-def run_release_check(project_root: Path, version: str = "2.0") -> list[ReleaseCheckResult]:
+def run_release_check(project_root: Path, version: str = "2.1.0") -> list[ReleaseCheckResult]:
     project_root = project_root.resolve()
     release_root = project_root / "release"
     portable_zip = release_root / f"DCS-AI-Copilot-portable-{version}.zip"

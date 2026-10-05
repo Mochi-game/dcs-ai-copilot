@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "2.0",
+    [string]$Version = "2.1.0",
     [Parameter(Mandatory = $true)]
     [string]$GitUserName,
     [Parameter(Mandatory = $true)]
