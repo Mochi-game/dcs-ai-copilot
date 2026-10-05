@@ -7,6 +7,7 @@ from typing import Callable
 from urllib.parse import urlparse
 
 from dcs_ai_copilot.kneeboard.state import KneeboardState
+from dcs_ai_copilot.web.case3_ui import STYLE, HTML, SCRIPT
 
 
 class LoopbackHTTPServer(HTTPServer):
@@ -46,7 +47,54 @@ def build_request_handler(
             if path == "/api/state":
                 self._send_json(state.as_json_data)
                 return
+            if path == "/api/case3":
+                self._send_json(state.case3.as_json_data)
+                return
             self.send_error(404, "Not found")
+
+        def do_POST(self) -> None:
+            path = urlparse(self.path).path
+            if path not in {"/api/view", "/api/theme", "/api/case3/eat", "/api/case3/crossing", "/api/case3/reset"}:
+                self.send_error(404, "Not found")
+                return
+            # Browser mutations are same-origin JSON; keep the existing loopback scope.
+            origin = self.headers.get("Origin")
+            if origin and origin != f"http://{self.headers.get('Host')}":
+                self.send_error(403, "Cross-origin request rejected")
+                return
+            if self.headers.get_content_type() != "application/json":
+                self.send_error(415, "Use application/json")
+                return
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if not 0 < length <= 4096:
+                    raise ValueError("JSON body must be 1–4096 bytes")
+                body = json.loads(self.rfile.read(length))
+                if not isinstance(body, dict):
+                    raise ValueError("Expected JSON object")
+                if path == "/api/view":
+                    view = body.get("view")
+                    if not isinstance(view, str):
+                        raise ValueError("view must be notes or case3")
+                    state.set_view(view)
+                elif path == "/api/theme":
+                    theme = body.get("theme")
+                    if not isinstance(theme, str):
+                        raise ValueError("theme must be night or day")
+                    state.set_theme(theme)
+                elif path == "/api/case3/eat":
+                    eat = body.get("eat")
+                    if not isinstance(eat, str):
+                        raise ValueError("eat must be a string: MM or HHMM")
+                    state.case3.set_eat(eat)
+                elif path == "/api/case3/crossing":
+                    state.case3.set_crossing()
+                else:
+                    state.reset_case3()
+            except (ValueError, UnicodeError) as exc:
+                self.send_error(400, "Invalid command", explain=str(exc))
+                return
+            self._send_json(state.as_json_data)
 
         def log_message(self, format: str, *args: object) -> None:
             return
@@ -73,7 +121,7 @@ def build_request_handler(
 
 
 def render_dashboard_html() -> str:
-    return """<!doctype html>
+    html = """<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -83,8 +131,8 @@ def render_dashboard_html() -> str:
     html, body {
       margin: 0;
       min-height: 100%;
-      background: #f4f0e4;
-      color: #101010;
+      background: var(--bg);
+      color: var(--fg);
       font-family: Consolas, "Courier New", monospace;
     }
     body {
@@ -93,7 +141,7 @@ def render_dashboard_html() -> str:
     }
     header {
       margin-bottom: 18px;
-      border-bottom: 2px solid #101010;
+      border-bottom: 2px solid var(--border);
       padding-bottom: 10px;
     }
     h1 {
@@ -113,7 +161,7 @@ def render_dashboard_html() -> str:
       margin-bottom: 28px;
     }
     .panel {
-      border-top: 2px solid #101010;
+      border-top: 2px solid var(--border);
       padding-top: 14px;
       margin-top: 20px;
     }
@@ -132,7 +180,7 @@ def render_dashboard_html() -> str:
       font-weight: 700;
     }
     .label {
-      color: #424242;
+      color: var(--muted);
     }
     .entry {
       white-space: pre-line;
@@ -156,14 +204,14 @@ def render_dashboard_html() -> str:
       overflow-wrap: anywhere;
     }
     .support {
-      border-top: 2px solid #101010;
+      border-top: 2px solid var(--border);
       margin-top: 22px;
       padding-top: 14px;
       font-size: 16px;
       font-weight: 700;
     }
     .support a {
-      color: #101010;
+      color: var(--fg);
     }
   </style>
 </head>
@@ -335,3 +383,16 @@ def render_dashboard_html() -> str:
 </body>
 </html>
 """
+    html = html.replace("  </style>", STYLE + "  </style>")
+    html = html.replace("<body>", '<body>\n<div id="notes-view">')
+    html = html.replace("  <script>", '</div>\n' + HTML + "  <script>" + SCRIPT)
+    html = html.replace("        render(data);", "        renderCase3(data);\n        render(data);")
+    html = html.replace('        document.getElementById("status").textContent = "SERVER UNAVAILABLE";',
+                        '        document.getElementById("status").textContent = "SERVER UNAVAILABLE";\n'
+                        '        document.getElementById("case3-status").textContent = "SERVER UNAVAILABLE";\n'
+                        '        document.getElementById("case3-countdown").textContent = "--:--";\n'
+                        '        document.getElementById("case3-next-countdown").textContent = "--:--";\n'
+                        '        document.getElementById("case3-current").textContent = "--";\n'
+                        '        document.getElementById("case3-next").textContent = "--";\n'
+                        '        document.getElementById("case3-voice").textContent = "VOICE: OFFLINE";')
+    return html

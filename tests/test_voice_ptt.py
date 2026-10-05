@@ -20,7 +20,7 @@ from dcs_ai_copilot.voice.joystick import (
     is_winmm_button_pressed,
     normalize_joystick_button,
 )
-from dcs_ai_copilot.voice.notes import parse_voice_note
+from dcs_ai_copilot.voice.notes import is_clear_notes_command, parse_voice_note
 from dcs_ai_copilot.voice.ptt import KeyMatcher, PushToTalkService, VoiceConfig
 from dcs_ai_copilot.voice.transcriber import (
     TranscriptionResult,
@@ -95,6 +95,13 @@ class VoicePttTests(unittest.TestCase):
         self.assertEqual(parse_voice_note("anteckna fuel 4200"), "fuel 4200")
         self.assertIsNone(parse_voice_note("target north 42 15"))
 
+    def test_clear_notes_command_is_recognized(self) -> None:
+        self.assertTrue(is_clear_notes_command("clear"))
+        self.assertTrue(is_clear_notes_command("clear notes"))
+        self.assertTrue(is_clear_notes_command("rensa"))
+        self.assertTrue(is_clear_notes_command("rensa anteckningar."))
+        self.assertFalse(is_clear_notes_command("note clear tanker"))
+
     def test_winmm_takeoff_panel_can_be_selected_by_zero_axis_shape(self) -> None:
         listener = WinmmJoystickPttListener(
             device_name="WINWING F18 TAKEOFF PANEL 2",
@@ -157,6 +164,23 @@ class VoicePttTests(unittest.TestCase):
         self.assertEqual(snapshot.voice["status"], "NOTE SAVED")
         self.assertEqual(snapshot.notes[0].text, "tanker tacan 12 x fuel 4200")
         self.assertEqual(snapshot.captures, [])
+
+    def test_clear_notes_transcript_removes_all_notes(self) -> None:
+        state = KneeboardState()
+        state.add_note("tanker tacan 12 x")
+        state.add_note("fuel 4200")
+        service = _build_service(
+            state=state,
+            transcriber=FakeTranscriber("rensa anteckningar"),
+        )
+
+        service.on_press("Key.f13")
+        service.on_release("Key.f13")
+
+        snapshot = _wait_for_voice_status(state, "NOTES CLEARED")
+        self.assertEqual(snapshot.voice["status"], "NOTES CLEARED")
+        self.assertEqual(snapshot.notes, [])
+        self.assertEqual(snapshot.voice["last_transcript"], "rensa anteckningar")
 
     def test_ptt_still_records_after_twenty_notes(self) -> None:
         state = KneeboardState()

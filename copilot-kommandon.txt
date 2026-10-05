@@ -1,0 +1,53 @@
+# Copilot AI - Röstkommandon
+
+## Anteckningar
+
+"Note [text]" : skapar ny anteckning
+"Notes" : växlar till NOTES-bladet
+"Clear note" / "Clear notes" : rensar bara anteckningar
+
+> "Clear" är inte verifierat i skarpt läge. Testa på marken först.
+
+## Case III
+
+"Case three" : växlar till CASE III-bladet
+"EAT three two" / "EAT thirty two" / "E A T 32" : EAT nästa :32
+"EAT five" / "EAT sixty" : minut 1–60 går, sixty = nästa hela timme
+"EAT fourteen thirty two" / "EAT 1432" : EAT 14:32
+"Marshal two zero zero, two two, angels seven, time three two, button one five" : komplett marshaluppdrag
+"Radial ... DME ... Angels ... Push time ... Button ..." : separata fält går också
+"Final bearing ..." / "TACAN ... X" / "ICLS ..." : valfria fält
+"Crossing" / "Marshal crossing now" : ny plan från senaste inbound-passage; EAT ändras inte
+"Commencing" / "Commence now" : startar inflygningen i generiskt läge
+"Clear case" : rensar bara CASE III
+"Sync clock HHMM" : manuell tidssynk om bara PC-klockan finns
+"Case three status" : växlar till CASE III-bladet
+"Reset case three" : nollställer, behåller anteckningar
+
+Klockan är DCS-uppdragets klocka (samma som cockpitklockan) när DCS-BIOS
+skickar data, annars PC-klockan. Bladet visar vilken: "PUSH / EAT · MISSION"
+eller "PUSH / EAT · PC". Tider satta på PC-klockan släpps när uppdragstiden börjar komma.
+Manuell synk ändrar inte Windows-klockan.
+
+## Kneeboard
+
+"Night mode" : mörkt kneeboard
+"Day mode" : ljust kneeboard
+
+---
+
+## Snabbreferens Marshal (MA CASE 3)
+
+1. Chevy11: start 55 nm söder, 20 000 ft, 250 KIAS. Säg "Case three".
+2. Läs EAT i MARSHAL-meddelandet (hel minut, DCS-klockan). Säg "EAT" + minuten.
+3. Sjunk till 6000 ft, flyg till 21 DME. All flygning i 250 kn.
+4. På tidig inbound-passage: säg "Crossing" och sväng vänster outbound.
+5. Varvet: 2 min sväng, 1 min rakt, 2 min sväng, 1 min rakt.
+   Svängarna är alltid 2 min. Mätaren visar "ONE MORE LAP" eller "LAST LAP".
+   11 minuter blir 6+5; 14 minuter blir 7+7. Sista inbound-ben slutar på fixen.
+6. "TURN INBOUND IN" blir röd och blinkar de sista 15 sekunderna.
+7. Commence: passera 21 DME inbound på EAT, 6000 ft, 250 kn. Tränaren
+   börjar automatiskt; utan tränaren säger du "Commencing".
+
+> Uppdraget räknar en passage av 21 DME som hållvarv om den sker mer än
+> 2 min före EAT. Commence poängsätts bara vid EAT.

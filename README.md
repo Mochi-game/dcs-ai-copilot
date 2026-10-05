@@ -9,6 +9,9 @@ Den här milstolpen gör bara detta:
 - Tolkar target-koordinater och elevation till strukturerad data.
 - Visar fångade koordinater i webbsidan.
 - Lyssnar read-only på DCS-BIOS exportström för några F/A-18C-värden.
+
+- Generisk CASE III med röststyrd marshal, CROSSING och COMMENCING utan MA CASE 3:
+  [docs/CASE3-GENERIC.md](docs/CASE3-GENERIC.md).
 - Spelar in mikrofonljud medan F13 hålls nere och transkriberar via OpenAI.
 - Kan använda fysisk joystick/DirectInput-knapp som primär PTT. För WINWING F18 TAKEOFF PANEL 2 används Windows WinMM-läsning när pygame inte exponerar panelen.
 - Kan spara enkla röstanteckningar som börjar med `note`.

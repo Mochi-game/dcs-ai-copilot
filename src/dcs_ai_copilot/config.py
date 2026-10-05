@@ -127,7 +127,7 @@ def load_config(config_file: Path) -> AppConfig:
         voice_max_record_seconds=parser.getfloat(
             "voice",
             "max_record_seconds",
-            fallback=20.0,
+            fallback=90.0,
         ),
         voice_transcription_provider=parser.get(
             "voice",

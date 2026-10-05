@@ -8,9 +8,11 @@ from dcs_ai_copilot.voice.audio import AudioClip
 
 
 TRANSCRIPTION_PROMPT = (
-    "Transcribe short DCS World F/A-18C radio-style coordinate calls. "
-    "Preserve words and numbers such as target, bullseye, tanker, waypoint, "
-    "north, south, east, west, elevation, feet, and decimal minutes."
+    "Transcribe DCS World F/A-18C radio speech faithfully, including slow "
+    "CASE III marshal readbacks. Preserve spoken words and numbers: marshal "
+    "radial, DME, angels, push time, EAT, approach button, final bearing, "
+    "TACAN, ICLS, crossing, commencing, and coordinates such as target, "
+    "bullseye, north, south, east, west, elevation, and decimal minutes."
 )
 
 GEMINI_TRANSCRIPTION_PROMPT = (

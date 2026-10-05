@@ -13,6 +13,10 @@ SELECTED_CONTROL_IDS = (
     "UFC_COMM2_DISPLAY",
     "COMM1_FREQ",
     "COMM2_FREQ",
+    "TIME_START_HIGH",
+    "TIME_START_LOW",
+    "TIME_MODEL_HIGH",
+    "TIME_MODEL_LOW",
 )
 
 
@@ -44,7 +48,7 @@ def load_reference_data(reference_dirs: list[Path]) -> ReferenceLoadResult:
 
 def _load_controls_from_dir(reference_dir: Path) -> dict[str, ControlOutput]:
     controls: dict[str, ControlOutput] = {}
-    for file_name in ("MetadataStart.json", "FA-18C_hornet.json"):
+    for file_name in ("MetadataStart.json", "CommonData.json", "FA-18C_hornet.json"):
         path = reference_dir / file_name
         if not path.exists():
             continue

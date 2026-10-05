@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import json
 import threading
 from dataclasses import dataclass
 from typing import Callable, Protocol
@@ -14,7 +15,7 @@ from dcs_ai_copilot.voice.joystick import (
     list_winmm_joystick_devices,
     normalize_joystick_button,
 )
-from dcs_ai_copilot.voice.notes import parse_voice_note
+from dcs_ai_copilot.voice.router import apply_case3_command, normalize_command, parse_command
 from dcs_ai_copilot.voice.parser import CoordinateParseError, parse_coordinate_message
 from dcs_ai_copilot.voice.transcriber import (
     TranscriptionResult,
@@ -236,7 +237,38 @@ class PushToTalkService:
             last_transcript=result.text,
             last_error="",
         )
-        note_text = parse_voice_note(result.text)
+        command = parse_command(result.text, active_view=self._state.snapshot().app["active_view"])
+        self._logger.info(
+            "STT RAW: %s\nNORMALIZED: %s\nROUTED: %s",
+            json.dumps(result.text, ensure_ascii=False),
+            json.dumps(normalize_command(result.text), ensure_ascii=False),
+            command.route_name,
+        )
+        try:
+            handled = apply_case3_command(command, self._state)
+        except ValueError as exc:
+            self._state.update_voice(status="COMMAND ERROR", last_error=str(exc))
+            return
+        if handled:
+            self._state.update_voice(status="READY", last_error="")
+            return
+
+        if command.kind == "clear_notes":
+            try:
+                snapshot = self._state.clear_notes()
+                self._render_snapshot(snapshot)
+            except Exception as exc:
+                self._state.update_voice(
+                    status="CLEAR NOTES ERROR",
+                    last_error=str(exc),
+                )
+                self._logger.warning("Could not clear voice notes: %s", exc)
+                return
+
+            self._state.update_voice(status="NOTES CLEARED", last_error="")
+            return
+
+        note_text = command.value if command.kind == "note" else None
         if note_text is not None:
             try:
                 snapshot = self._state.add_note(note_text)

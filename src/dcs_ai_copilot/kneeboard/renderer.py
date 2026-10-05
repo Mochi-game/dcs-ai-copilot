@@ -34,8 +34,8 @@ def render_kneeboard(
     body {{
       margin: 0;
       padding: 24px;
-      background: #f5f2e8;
-      color: #111;
+      background: #080e14;
+      color: #c5cdd3;
       font-family: Consolas, "Courier New", monospace;
       font-size: 28px;
       line-height: 1.35;

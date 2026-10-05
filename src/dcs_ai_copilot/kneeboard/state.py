@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from threading import RLock
+from dcs_ai_copilot.case3 import Case3State
+from dcs_ai_copilot.clock import MissionClock
 
 from dcs_ai_copilot.voice.parser import CapturedCoordinate
 
@@ -28,10 +30,14 @@ class KneeboardSnapshot:
 class KneeboardState:
     def __init__(self) -> None:
         self._lock = RLock()
+        self.mission_clock = MissionClock()
+        self.case3 = Case3State(self.mission_clock.reading)
         self._captures: list[CapturedCoordinate] = []
         self._notes: list[VoiceNote] = []
         self._revision = 0
         self._app: dict[str, object] = {
+            "active_view": "notes",
+            "theme": "night",
             "buy_me_a_coffee_url": "",
         }
         self._dcs_bios: dict[str, object] = {
@@ -68,6 +74,23 @@ class KneeboardState:
         with self._lock:
             return len(self._captures) + 1
 
+    def set_view(self, view: str) -> KneeboardSnapshot:
+        if view not in {"notes", "case3"}:
+            raise ValueError("view must be notes or case3")
+        return self.update_app(active_view=view)
+
+    def reset_case3(self) -> KneeboardSnapshot:
+        with self._lock:
+            self.case3.reset()
+            self._app["active_view"] = "case3"
+            self._revision += 1
+            return self.snapshot()
+
+    def set_theme(self, theme: str) -> KneeboardSnapshot:
+        if theme not in {"night", "day"}:
+            raise ValueError("theme must be night or day")
+        return self.update_app(theme=theme)
+
     def next_note_index(self) -> int:
         with self._lock:
             return len(self._notes) + 1
@@ -82,6 +105,13 @@ class KneeboardState:
         with self._lock:
             self._notes.append(VoiceNote(index=len(self._notes) + 1, text=text))
             self._revision += 1
+            return self.snapshot()
+
+    def clear_notes(self) -> KneeboardSnapshot:
+        with self._lock:
+            if self._notes:
+                self._notes.clear()
+                self._revision += 1
             return self.snapshot()
 
     def snapshot(self) -> KneeboardSnapshot:
@@ -122,6 +152,9 @@ class KneeboardState:
     def as_json_data(self) -> dict[str, object]:
         snapshot = self.snapshot()
         return {
+            "active_view": snapshot.app["active_view"],
+            "theme": snapshot.app["theme"],
+            "case3": self.case3.as_json_data(),
             "revision": snapshot.revision,
             "captures": [
                 {

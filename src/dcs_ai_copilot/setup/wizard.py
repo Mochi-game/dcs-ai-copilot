@@ -146,7 +146,7 @@ def build_config(answers: SetupAnswers) -> configparser.ConfigParser:
         "input_device": answers.input_device.strip(),
         "sample_rate": "16000",
         "channels": "1",
-        "max_record_seconds": "20",
+        "max_record_seconds": "90",
         "transcription_provider": "openai",
         "transcription_fallback_provider": "gemini" if answers.gemini_api_key.strip() else "",
         "transcription_model": "gpt-4o-mini-transcribe",

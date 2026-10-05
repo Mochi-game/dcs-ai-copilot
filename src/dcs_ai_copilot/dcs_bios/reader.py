@@ -141,6 +141,7 @@ class DcsBiosReader:
             }
 
         aircraft = str(values.get("_ACFT_NAME", {}).get("display", "")).strip()
+        self._publish_mission_time(values)
         self._state.update_dcs_bios(
             status="CONNECTED" if aircraft else "RECEIVING",
             listening=True,
@@ -149,6 +150,17 @@ class DcsBiosReader:
             is_fa18c=aircraft == "FA-18C_hornet",
             values=values,
         )
+
+    def _publish_mission_time(self, values: dict[str, dict[str, object]]) -> None:
+        words = [values.get(name, {}).get("raw") for name in (
+            "TIME_START_HIGH", "TIME_START_LOW", "TIME_MODEL_HIGH", "TIME_MODEL_LOW")]
+        if not all(isinstance(word, int) for word in words):
+            return
+        start = words[0] * 65536 + words[1]
+        model = words[2] * 65536 + words[3]
+        # All zero before DCS has sent a frame from a running mission.
+        if start or model:
+            self._state.mission_clock.update(start, model)
 
     def _mark_timeout_if_needed(self) -> None:
         snapshot = self._state.snapshot().dcs_bios
