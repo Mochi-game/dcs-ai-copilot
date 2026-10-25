@@ -39,6 +39,18 @@ function New-AppShortcut {
     $Shortcut.Save()
 }
 
+function New-DocumentShortcut {
+    param(
+        [string]$Path,
+        [string]$DocumentPath
+    )
+    $Shortcut = $Shell.CreateShortcut($Path)
+    $Shortcut.TargetPath = "notepad.exe"
+    $Shortcut.Arguments = "`"$DocumentPath`""
+    $Shortcut.WorkingDirectory = $ResolvedInstallDir
+    $Shortcut.Save()
+}
+
 if (-not $NoStartMenuShortcuts) {
     $StartMenuDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\DCS AI Copilot"
     New-Item -ItemType Directory -Force -Path $StartMenuDir | Out-Null
@@ -46,6 +58,7 @@ if (-not $NoStartMenuShortcuts) {
     New-AppShortcut -Path (Join-Path $StartMenuDir "DCS AI Copilot.lnk")
     New-AppShortcut -Path (Join-Path $StartMenuDir "First-time Setup.lnk") -Arguments "--setup"
     New-AppShortcut -Path (Join-Path $StartMenuDir "Setup Help.lnk") -Arguments "--setup-help"
+    New-DocumentShortcut -Path (Join-Path $StartMenuDir "API Key Guide.lnk") -DocumentPath (Join-Path $ResolvedInstallDir "docs\API-KEY-SETUP.md")
     New-AppShortcut -Path (Join-Path $StartMenuDir "Check Installation.lnk") -Arguments "--doctor"
     New-AppShortcut -Path (Join-Path $StartMenuDir "DCS-BIOS Setup Help.lnk") -Arguments "--dcs-bios-help"
     New-AppShortcut -Path (Join-Path $StartMenuDir "Joystick Diagnostics.lnk") -Arguments "--diagnose-joysticks"

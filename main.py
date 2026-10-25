@@ -278,7 +278,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--release-version",
-        default="3.0.0",
+        default="4.0.0",
         help="Release version to check with --release-check.",
     )
     parser.add_argument(

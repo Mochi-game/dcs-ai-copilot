@@ -17,7 +17,7 @@ This guide is for Windows users installing DCS AI Copilot for DCS World F/A-18C.
 
 If you downloaded the Windows installer:
 
-1. Run `DCS-AI-Copilot-Setup-2.0.exe`.
+1. Run the downloaded `DCS-AI-Copilot-Setup-<version>.exe`.
 2. Keep the default install folder unless you have a reason to change it:
 
 ```text
@@ -76,6 +76,10 @@ The wizard writes:
 
 Your API key is stored in `.env`, not in `config.ini`.
 Your VR platform is stored in `config.ini` only so help and doctor output can use the right wording. AI Copilot does not change OpenXR, SteamVR, Oculus, PimaxXR, QuadViews, Pimax Play or DCS graphics settings.
+
+For exact links and illustrated step-by-step wording for OpenAI and the optional
+Gemini fallback, open `docs/API-KEY-SETUP.md`. Installed builds also add
+`DCS AI Copilot > API Key Guide` to the Windows Start menu.
 
 If you configure the API keys manually instead, copy `.env.example` to `.env` and fill in `OPENAI_API_KEY`. Fill in `GEMINI_API_KEY` only if you want Gemini fallback. Do not share or commit the real `.env` file.
 

@@ -2,7 +2,7 @@
 
 ## Current release
 
-- Version: **3.0.0**.
+- Version: **4.0.0**.
 - Windows releases are built by the tag-triggered GitHub Actions workflow.
 - The installer, portable ZIP and release notes are published on the matching
   GitHub Release.

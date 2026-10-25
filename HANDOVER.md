@@ -1,6 +1,6 @@
 # HANDOVER.md — DCS AI Copilot
 
-## Version 3.0.0
+## Version 4.0.0
 
 This release packages the current microphone selector, voice reliability,
 background startup and concurrent local-dashboard fixes together with the

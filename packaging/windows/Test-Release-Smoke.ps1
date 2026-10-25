@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "3.0.0",
+    [string]$Version = "4.0.0",
     [switch]$KeepTemp
 )
 
@@ -62,6 +62,7 @@ try {
         "LICENSE",
         "README.md",
         "docs\LICENSE_HELP.md",
+        "docs\API-KEY-SETUP.md",
         "docs\USER_SETUP_GUIDE.md",
         "Install-DCS-AI-Copilot.ps1",
         "Uninstall-DCS-AI-Copilot.ps1",
@@ -76,6 +77,12 @@ try {
     if (Test-Path -LiteralPath (Join-Path $ExtractDir ".env")) {
         throw "Portable ZIP must not contain a real .env file."
     }
+
+    $PackagedConfig = Get-Content -LiteralPath (Join-Path $ExtractDir "_internal\config.ini") -Raw
+    if ($PackagedConfig -match "(?m)^input_device[ \t]*=[ \t]*[^ \t\r\n]") {
+        throw "Portable ZIP must not pin a local microphone in config.ini."
+    }
+    Assert-TextContains -Text $PackagedConfig -Needle "transcription_model = gpt-4o-mini-transcribe" -Name "packaged config.ini"
 
     $ExePath = Join-Path $ExtractDir "DCS-AI-Copilot.exe"
     $Help = Invoke-Checked -FilePath $ExePath -Arguments @("--help") -Name "built --help" -WorkingDirectory $ExtractDir

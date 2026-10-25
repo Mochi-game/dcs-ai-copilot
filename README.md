@@ -36,6 +36,7 @@ Public safety summary:
 
 ## Dokumentation
 
+- [API-nycklar — OpenAI och valfri Gemini fallback](docs/API-KEY-SETUP.md)
 - [Röstkommandon — vad säger jag när?](docs/VOICE-COMMANDS.md)
 - [Mikrofoninställning och felsökning](docs/MICROPHONE-SETUP.md)
 - [OpenKneeboard quick reference](docs/QUICK-REFERENCE.md)
@@ -88,6 +89,10 @@ google-genai
 ```
 
 ## OpenAI API-nyckel
+
+Den kompletta steg-för-steg-guiden med officiella länkar finns i
+[docs/API-KEY-SETUP.md](docs/API-KEY-SETUP.md). OpenAI krävs som huvudtjänst.
+Gemini är valfri fallback och behöver inte fyllas i.
 
 Lägg nyckeln i `.env`:
 

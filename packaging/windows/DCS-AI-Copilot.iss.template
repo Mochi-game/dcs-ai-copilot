@@ -31,6 +31,7 @@ Source: "..\..\dist\DCS-AI-Copilot\*"; DestDir: "{app}"; Flags: ignoreversion re
 Name: "{group}\DCS AI Copilot"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\First-time Setup"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--setup"
 Name: "{group}\Setup Help"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--setup-help"
+Name: "{group}\API Key Guide"; Filename: "{sys}\notepad.exe"; Parameters: """{app}\docs\API-KEY-SETUP.md"""; WorkingDir: "{app}"
 Name: "{group}\Check Installation"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--doctor"
 Name: "{group}\DCS-BIOS Setup Help"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--dcs-bios-help"
 Name: "{group}\Joystick Diagnostics"; Filename: "{app}\{#MyAppExeName}"; Parameters: "--diagnose-joysticks"

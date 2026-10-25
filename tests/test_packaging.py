@@ -51,7 +51,7 @@ class PackagingTests(unittest.TestCase):
     def test_user_guide_covers_installer_and_manual_env_setup(self) -> None:
         guide = (ROOT / "docs" / "USER_SETUP_GUIDE.md").read_text(encoding="utf-8")
 
-        self.assertIn("DCS-AI-Copilot-Setup-2.0.exe", guide)
+        self.assertIn("DCS-AI-Copilot-Setup-<version>.exe", guide)
         self.assertIn("DCS AI Copilot > First-time Setup", guide)
         self.assertIn(".env.example", guide)
         self.assertIn("DCS AI Copilot > Uninstall DCS AI Copilot", guide)
@@ -59,6 +59,19 @@ class PackagingTests(unittest.TestCase):
         self.assertTrue((ROOT / "docs" / "DCS_BIOS_SETUP.md").exists())
         self.assertIn("VR platform/headset", guide)
         self.assertIn("does not change OpenXR", guide)
+
+    def test_api_key_guide_has_official_links_and_safe_setup_steps(self) -> None:
+        guide = (ROOT / "docs" / "API-KEY-SETUP.md").read_text(encoding="utf-8")
+
+        self.assertIn("https://platform.openai.com/api-keys", guide)
+        self.assertIn("https://developers.openai.com/api/docs/quickstart", guide)
+        self.assertIn("https://aistudio.google.com/app/apikey", guide)
+        self.assertIn("https://ai.google.dev/gemini-api/docs/api-key", guide)
+        self.assertIn("OPENAI_API_KEY=", guide)
+        self.assertIn("GEMINI_API_KEY=", guide)
+        self.assertIn("DCS AI Copilot > First-time Setup", guide)
+        self.assertIn("DCS AI Copilot > Check Installation", guide)
+        self.assertIn("Do not paste it into Discord, GitHub", guide)
 
     def test_public_default_config_does_not_pin_local_joystick_id(self) -> None:
         config = (ROOT / "config.ini").read_text(encoding="utf-8")
@@ -88,8 +101,18 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("Prepare-Local-Git-Repository.ps1", script)
         self.assertIn("Test-Release-Smoke.ps1", script)
         self.assertIn('Join-Path $ProjectRoot "README.md"', script)
+        self.assertIn("config.release.ini", script)
         self.assertIn('Join-Path $ProjectRoot ".env.example"', script)
         self.assertIn('Join-Path $ProjectRoot "docs"', script)
+
+    def test_public_release_config_does_not_contain_local_device_selection(self) -> None:
+        release_config = (ROOT / "packaging" / "windows" / "config.release.ini").read_text(encoding="utf-8")
+
+        self.assertIn("input_device =\n", release_config)
+        self.assertIn("install_path =\n", release_config)
+        self.assertIn("saved_games_path =\n", release_config)
+        self.assertIn("transcription_model = gpt-4o-mini-transcribe", release_config)
+        self.assertNotIn("Microphone (Pimax)", release_config)
 
     def test_prepare_github_release_script_gates_final_publish(self) -> None:
         script = (ROOT / "packaging" / "windows" / "Prepare-GitHub-Release.ps1").read_text(encoding="utf-8")
@@ -127,6 +150,8 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("__APP_PUBLISHER__", template)
         self.assertIn("__APP_ID__", template)
         self.assertIn("Check Installation", template)
+        self.assertIn("API Key Guide", template)
+        self.assertIn("docs\\API-KEY-SETUP.md", template)
         self.assertIn("--doctor", template)
         self.assertIn("DCS-BIOS Setup Help", template)
         self.assertIn("--dcs-bios-help", template)
@@ -191,6 +216,8 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("NoStartMenuShortcuts", install_script)
         self.assertIn("First-time setup was not started", install_script)
         self.assertIn("Audio Diagnostics.lnk", install_script)
+        self.assertIn("API Key Guide.lnk", install_script)
+        self.assertIn("docs\\API-KEY-SETUP.md", install_script)
         self.assertIn("--diagnose-audio", install_script)
         self.assertIn("DCS-BIOS Setup Help.lnk", install_script)
         self.assertIn("--dcs-bios-help", install_script)
@@ -208,6 +235,8 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("DCS-AI-Copilot-Setup-$Version.exe", script)
         self.assertIn("Expand-Archive", script)
         self.assertIn("Portable ZIP must not contain a real .env file", script)
+        self.assertIn("Portable ZIP must not pin a local microphone", script)
+        self.assertIn('"docs\\API-KEY-SETUP.md"', script)
         self.assertIn("--setup-help", script)
         self.assertIn("--release-check", script)
         self.assertIn("-NoLaunchSetup", script)

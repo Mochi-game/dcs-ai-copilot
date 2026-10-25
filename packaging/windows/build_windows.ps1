@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "3.0.0",
+    [string]$Version = "4.0.0",
     [string]$BuyMeACoffeeUrl = "",
     [string]$Publisher = "Michael Johnlin",
     [string]$AppId = "{{3B6F0F84-7B89-4F6A-88F4-D6D816D78941}}",
@@ -18,6 +18,7 @@ $EntryPoint = Join-Path $ProjectRoot "main.py"
 $TemplatePath = Join-Path $PSScriptRoot "DCS-AI-Copilot.iss.template"
 $GeneratedIssPath = Join-Path $PSScriptRoot "DCS-AI-Copilot.generated.iss"
 $BuildConfigPath = Join-Path $BuildMetaPath "config.ini"
+$ReleaseConfigTemplatePath = Join-Path $PSScriptRoot "config.release.ini"
 $LicensePath = Join-Path $ProjectRoot "LICENSE"
 
 Set-Location $ProjectRoot
@@ -28,7 +29,10 @@ if ($RequireLicense -and -not (Test-Path $LicensePath)) {
     throw "Final release build requires LICENSE. Choose your license, create LICENSE, then run again."
 }
 
-Copy-Item -Path (Join-Path $ProjectRoot "config.ini") -Destination $BuildConfigPath -Force
+if (-not (Test-Path -LiteralPath $ReleaseConfigTemplatePath)) {
+    throw "Public release config is missing: $ReleaseConfigTemplatePath"
+}
+Copy-Item -LiteralPath $ReleaseConfigTemplatePath -Destination $BuildConfigPath -Force
 if ($BuyMeACoffeeUrl) {
     $ConfigText = Get-Content -Path $BuildConfigPath -Raw
     if ($ConfigText -notmatch "\[donation\]") {
@@ -94,6 +98,7 @@ $ReleaseNotesPath = Join-Path $ReleasePath "RELEASE_NOTES-$Version.md"
 - More reliable background startup, HTTP dashboard handling and PTT/audio recovery.
 - Bounded FIFO transcription queue keeps spoken notes and clear commands in order.
 - Pilot-facing voice command, microphone and printable quick-reference guides are included under `docs`.
+- New API key guide with official OpenAI/Gemini links, safe `.env` setup and a Start Menu shortcut.
 
 ## First Run
 
