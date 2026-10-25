@@ -15,10 +15,11 @@ class AudioClip:
 
     @property
     def duration_seconds(self) -> float:
-        bytes_per_sample = 2
-        if self.sample_rate <= 0 or self.channels <= 0:
+        try:
+            with wave.open(io.BytesIO(self.wav_bytes), "rb") as wav:
+                return wav.getnframes() / wav.getframerate()
+        except (wave.Error, EOFError, ZeroDivisionError):
             return 0.0
-        return len(self.wav_bytes) / (self.sample_rate * self.channels * bytes_per_sample)
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,21 @@ class MicrophoneRecorder:
     def is_recording(self) -> bool:
         return self._stream is not None
 
+    def describe_input(self) -> str:
+        import sounddevice as sd
+
+        device = sd.query_devices(self._input_device, "input")
+        host = sd.query_hostapis(device["hostapi"])["name"]
+        return f"{device['name']} ({host})"
+
+    def validate_input(self) -> None:
+        import sounddevice as sd
+
+        sd.check_input_settings(
+            device=self._input_device, samplerate=self._sample_rate,
+            channels=self._channels, dtype="int16",
+        )
+
     def start(self) -> None:
         if self._stream is not None:
             return
@@ -51,21 +67,28 @@ class MicrophoneRecorder:
         with self._lock:
             self._frames = []
 
-        self._stream = sd.InputStream(
+        stream = sd.RawInputStream(
             samplerate=self._sample_rate,
             channels=self._channels,
             dtype="int16",
             device=self._input_device,
             callback=self._on_audio,
         )
-        self._stream.start()
+        try:
+            stream.start()
+        except Exception:
+            stream.close()
+            raise
+        self._stream = stream
 
     def stop(self) -> AudioClip:
         stream = self._stream
         self._stream = None
         if stream is not None:
-            stream.stop()
-            stream.close()
+            try:
+                stream.stop()
+            finally:
+                stream.close()
 
         with self._lock:
             pcm = b"".join(self._frames)
@@ -101,6 +124,23 @@ def _parse_input_device(value: str) -> int | str | None:
         return int(value)
     except ValueError:
         return value
+
+
+def microphone_choices() -> list[dict[str, str]]:
+    """Enumerate on demand, without opening streams or changing audio defaults."""
+    import sounddevice as sd
+
+    hosts = sd.query_hostapis()
+    choices = [{"value": "", "label": "Windows default microphone"}]
+    seen = set()
+    for device in sd.query_devices():
+        if device["max_input_channels"] <= 0:
+            continue
+        name = f"{device['name']}, {hosts[device['hostapi']]['name']}"
+        if name not in seen:
+            choices.append({"value": name, "label": name})
+            seen.add(name)
+    return choices
 
 
 def list_audio_input_devices(
@@ -162,12 +202,13 @@ def run_audio_diagnostics(print_func: Callable[[str], None] = print) -> int:
 
 
 def _default_input_index(default_device: object) -> int | None:
-    if isinstance(default_device, (list, tuple)):
-        if not default_device:
+    value = default_device
+    if not isinstance(default_device, (str, int)):
+        try:
+            # sounddevice returns an indexable pair, not a list/tuple.
+            value = default_device[0]
+        except (TypeError, IndexError, KeyError):
             return None
-        value = default_device[0]
-    else:
-        value = default_device
     try:
         index = int(value)
     except (TypeError, ValueError):

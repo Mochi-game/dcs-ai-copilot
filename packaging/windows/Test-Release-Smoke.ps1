@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "2.1.0",
+    [string]$Version = "3.0.0",
     [switch]$KeepTemp
 )
 

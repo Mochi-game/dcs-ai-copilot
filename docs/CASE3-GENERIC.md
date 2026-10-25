@@ -1,8 +1,8 @@
 # Generic CASE III in DCS AI Copilot
 
 This workflow works in ordinary and multiplayer DCS missions, with or
-without MA CASE 3 or Bankler. It follows `I:\Claudecode\ma-case3\Case 3
-Procedures.pdf`, especially pages 9, 18–22 and 24–29. The pilot supplies
+without MA CASE 3 or Bankler. It follows the MA CASE 3 procedure reference
+used during implementation, especially pages 9, 18–22 and 24–29. The pilot supplies
 the actual assignment; radial, distance, angels, final bearing, button,
 TACAN and ICLS have no trainer defaults.
 

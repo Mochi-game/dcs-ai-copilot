@@ -28,6 +28,9 @@ class WebServerTests(unittest.TestCase):
 
             self.assertIn("<title>AI COPILOT</title>", html)
             self.assertIn("/api/state", html)
+            for element in ("voice-input", "voice-model", "voice-latency", "mic-select", "mic-apply", "mic-refresh"):
+                self.assertIn(f'id="{element}"', html)
+            self.assertIn("setTimeout(refresh, 500)", html)
         finally:
             server.shutdown()
             server.server_close()
@@ -48,6 +51,10 @@ class WebServerTests(unittest.TestCase):
             last_transcript="target north 42 15.732 east 041 38.219 elevation 428",
             ptt_key="F13",
             model="gpt-4o-mini-transcribe",
+            input_device="Test microphone, WASAPI",
+            pending_count=2,
+            last_model="fake-transcriber",
+            last_latency_seconds=1.25,
         )
         state.add_capture(
             parse_coordinate_message(
@@ -74,6 +81,10 @@ class WebServerTests(unittest.TestCase):
             self.assertEqual(payload["voice"]["status"], "RECORDING")
             self.assertTrue(payload["voice"]["is_recording"])
             self.assertEqual(payload["voice"]["ptt_key"], "F13")
+            self.assertEqual(payload["voice"]["input_device"], "Test microphone, WASAPI")
+            self.assertEqual(payload["voice"]["pending_count"], 2)
+            self.assertEqual(payload["voice"]["last_model"], "fake-transcriber")
+            self.assertEqual(payload["voice"]["last_latency_seconds"], 1.25)
         finally:
             server.shutdown()
             server.server_close()

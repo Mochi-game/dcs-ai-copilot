@@ -34,6 +34,26 @@ Public safety summary:
 - No hidden multiplayer or server data is read.
 - No DCS graphics, OpenXR, PimaxXR, QuadViews or Pimax Play settings are changed.
 
+## Dokumentation
+
+- [Röstkommandon — vad säger jag när?](docs/VOICE-COMMANDS.md)
+- [Mikrofoninställning och felsökning](docs/MICROPHONE-SETUP.md)
+- [OpenKneeboard quick reference](docs/QUICK-REFERENCE.md)
+- [Utskrivbar PDF-guide](docs/DCS-AI-Copilot-Quick-Guide.pdf)
+- [Generisk CASE III — bakgrund och beräkningar](docs/CASE3-GENERIC.md)
+
+## Första flygningen
+
+1. Starta AI Copilot och öppna `http://127.0.0.1:8765`.
+2. Välj mikrofon i dashboardens `VOICE`-del och tryck **Use microphone**.
+3. Håll PTT, kontrollera att `RECORDING` visas, säg `NOTE microphone test`,
+   släpp PTT och kontrollera `LAST TRANSCRIPT`.
+4. Lägg samma URL som Web Dashboard i OpenKneeboard.
+5. För CASE III, kom ihåg: **EAT -> CROSSING -> COMMENCING**.
+
+Mikrofonvalet gäller endast AI Copilot. Det ändrar inte Windows standardljud,
+SRS, Discord, DCS eller VR-inställningar.
+
 ## License
 
 DCS AI Copilot is released under the MIT License. See `LICENSE`.
@@ -124,7 +144,10 @@ Lista mikrofoner och andra ljudingångar:
 python main.py --diagnose-audio
 ```
 
-Om Windows standardmikrofon inte är rätt kan du sätta `input_device` i `config.ini` till indexet eller exakt namn från diagnostiken:
+Om Windows standardmikrofon inte är rätt, välj enheten i dashboardens
+`VOICE`-del och tryck **Use microphone**. Valet sparas med exakt enhetsnamn
+och Windows host API i `config.ini`. Ett numeriskt index kan också anges
+manuellt, men kan ändras när USB-enheter kopplas om:
 
 ```ini
 [voice]
@@ -254,7 +277,9 @@ model = gemini-2.5-flash
 
 Gemini får samma korta WAV-klipp som OpenAI. Ingen lokal AI-modell eller GPU används.
 
-Ljud spelas in lokalt som 16 kHz mono PCM/WAV endast medan PTT är aktiv. Max inspelningstid är 20 sekunder.
+Ljud spelas in lokalt som 16 kHz mono PCM/WAV endast medan PTT är aktiv.
+Säkerhetsgränsen styrs av `max_record_seconds` i `config.ini`; aktuell
+standard i källkoden är 90 sekunder.
 
 ### API usage och kostnad
 
@@ -265,6 +290,8 @@ OpenAI usage/kostnad ses i OpenAI Platform dashboard och via OpenAI Usage/Costs 
 Dashboarden visar:
 
 - `VOICE STATUS`
+- vald `MICROPHONE`
+- `STT MODEL` och `STT TIME`
 - `PTT MODE`
 - joystick-status och knappnummer
 - `LAST TRANSCRIPT`

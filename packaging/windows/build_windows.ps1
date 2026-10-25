@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "2.1.0",
+    [string]$Version = "3.0.0",
     [string]$BuyMeACoffeeUrl = "",
     [string]$Publisher = "Michael Johnlin",
     [string]$AppId = "{{3B6F0F84-7B89-4F6A-88F4-D6D816D78941}}",
@@ -87,6 +87,13 @@ $ReleaseNotesPath = Join-Path $ReleasePath "RELEASE_NOTES-$Version.md"
 
 - Portable ZIP: `DCS-AI-Copilot-portable-$Version.zip`
 - Windows installer: `DCS-AI-Copilot-Setup-$Version.exe` if built with Inno Setup
+
+## What's New
+
+- Select and apply the microphone directly in the local dashboard; the choice is saved for future starts.
+- More reliable background startup, HTTP dashboard handling and PTT/audio recovery.
+- Bounded FIFO transcription queue keeps spoken notes and clear commands in order.
+- Pilot-facing voice command, microphone and printable quick-reference guides are included under `docs`.
 
 ## First Run
 

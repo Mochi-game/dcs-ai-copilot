@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import threading
 from pathlib import Path
 
 
@@ -16,7 +17,7 @@ if not getattr(sys, "frozen", False) and str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from dcs_ai_copilot.app_paths import ensure_config_root, runtime_root
-from dcs_ai_copilot.config import load_config
+from dcs_ai_copilot.config import load_config, save_voice_input
 from dcs_ai_copilot.dcs_bios.reader import DcsBiosReader, DcsBiosReaderConfig
 from dcs_ai_copilot.env import load_env_file
 from dcs_ai_copilot.kneeboard.state import KneeboardState
@@ -103,17 +104,6 @@ def main() -> int:
     state = KneeboardState()
     state.update_app(buy_me_a_coffee_url=config.buy_me_a_coffee_url)
 
-    try:
-        server, thread = start_kneeboard_server(
-            state,
-            host=config.web_host,
-            port=config.web_port,
-        )
-    except OSError as exc:
-        logger.error("Could not start web dashboard: %s", exc)
-        print(f"Could not start web dashboard on {config.web_host}:{config.web_port}.")
-        print("Close any older dcs-ai-copilot/python instance using that port and try again.")
-        return 1
     dcs_bios_reader = DcsBiosReader(
         DcsBiosReaderConfig(
             enabled=config.dcs_bios_enabled,
@@ -124,7 +114,6 @@ def main() -> int:
         state,
         logger,
     )
-    dcs_bios_reader.start()
     voice_service = PushToTalkService(
         VoiceConfig(
             enabled=config.voice_enabled,
@@ -147,7 +136,19 @@ def main() -> int:
         state,
         config.kneeboard_file,
         logger,
+        save_input_device=lambda device: save_voice_input(config_file, device),
     )
+    try:
+        server, thread = start_kneeboard_server(
+            state, host=config.web_host, port=config.web_port,
+            voice_service=voice_service,
+        )
+    except OSError as exc:
+        logger.error("Could not start web dashboard: %s", exc)
+        print(f"Could not start web dashboard on {config.web_host}:{config.web_port}.")
+        print("Close any older dcs-ai-copilot/python instance using that port and try again.")
+        return 1
+    dcs_bios_reader.start()
     try:
         voice_service.start()
     except Exception as exc:
@@ -178,6 +179,9 @@ def main() -> int:
     print()
 
     try:
+        if args.background:
+            # Hidden launchers have no terminal input; keep services alive on EOF.
+            threading.Event().wait()
         while True:
             try:
                 raw_text = input("> ").strip()
@@ -223,6 +227,10 @@ def main() -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="DCS AI Copilot")
+    parser.add_argument(
+        "--background", action="store_true",
+        help="Run without terminal input (for hidden start scripts).",
+    )
     parser.add_argument(
         "--setup",
         action="store_true",
@@ -270,7 +278,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--release-version",
-        default="2.1.0",
+        default="3.0.0",
         help="Release version to check with --release-check.",
     )
     parser.add_argument(

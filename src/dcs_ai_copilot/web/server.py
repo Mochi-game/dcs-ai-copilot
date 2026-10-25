@@ -2,27 +2,35 @@ from __future__ import annotations
 
 import json
 import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Callable
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from typing import Callable, Protocol
 from urllib.parse import urlparse
 
 from dcs_ai_copilot.kneeboard.state import KneeboardState
 from dcs_ai_copilot.web.case3_ui import STYLE, HTML, SCRIPT
 
 
-class LoopbackHTTPServer(HTTPServer):
+class LoopbackHTTPServer(ThreadingHTTPServer):
     allow_reuse_address = False
+    daemon_threads = True
+    connection_timeout = 5.0
+
+
+class MicrophoneControl(Protocol):
+    def list_microphones(self) -> dict[str, object]: ...
+    def select_microphone(self, device: str) -> None: ...
 
 
 def start_kneeboard_server(
     state: KneeboardState,
     host: str = "127.0.0.1",
     port: int = 8765,
+    voice_service: MicrophoneControl | None = None,
 ) -> tuple[LoopbackHTTPServer, threading.Thread]:
     if host != "127.0.0.1":
         raise ValueError("web server must bind to 127.0.0.1")
 
-    handler = build_request_handler(state)
+    handler = build_request_handler(state, voice_service)
     server = LoopbackHTTPServer((host, port), handler)
     thread = threading.Thread(
         target=server.serve_forever,
@@ -35,9 +43,15 @@ def start_kneeboard_server(
 
 def build_request_handler(
     state: KneeboardState,
+    voice_service: MicrophoneControl | None = None,
 ) -> type[BaseHTTPRequestHandler]:
     class KneeboardRequestHandler(BaseHTTPRequestHandler):
         server_version = "DCSAICopilot/0.1"
+
+        def setup(self) -> None:
+            super().setup()
+            # Browser preconnects can open sockets without sending a request.
+            self.connection.settimeout(self.server.connection_timeout)
 
         def do_GET(self) -> None:
             path = urlparse(self.path).path
@@ -50,15 +64,42 @@ def build_request_handler(
             if path == "/api/case3":
                 self._send_json(state.case3.as_json_data)
                 return
+            if path == "/api/microphones":
+                if not self._local_host():
+                    self.send_error(403, "Invalid local host")
+                    return
+                if voice_service is None:
+                    self._send_json(lambda: {"error": "Microphone selection unavailable"}, 503)
+                    return
+                try:
+                    devices = voice_service.list_microphones()
+                except Exception as exc:
+                    self._send_json(lambda: {"error": str(exc)}, 503)
+                    return
+                self._send_json(lambda: devices)
+                return
             self.send_error(404, "Not found")
 
         def do_POST(self) -> None:
             path = urlparse(self.path).path
-            if path not in {"/api/view", "/api/theme", "/api/case3/eat", "/api/case3/crossing", "/api/case3/reset"}:
+            if path not in {"/api/view", "/api/theme", "/api/case3/eat", "/api/case3/crossing", "/api/case3/reset", "/api/voice/input"}:
                 self.send_error(404, "Not found")
+                return
+            # Consume bounded bodies before rejecting headers; closing a Windows
+            # socket with unread request data can reset it before the reply arrives.
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if not 0 < length <= 4096:
+                    raise ValueError("JSON body must be 1-4096 bytes")
+                raw_body = self.rfile.read(length)
+            except ValueError as exc:
+                self._send_json(lambda: {"error": str(exc)}, 400)
                 return
             # Browser mutations are same-origin JSON; keep the existing loopback scope.
             origin = self.headers.get("Origin")
+            if path == "/api/voice/input" and not self._local_host():
+                self.send_error(403, "Invalid local host")
+                return
             if origin and origin != f"http://{self.headers.get('Host')}":
                 self.send_error(403, "Cross-origin request rejected")
                 return
@@ -66,13 +107,23 @@ def build_request_handler(
                 self.send_error(415, "Use application/json")
                 return
             try:
-                length = int(self.headers.get("Content-Length", "0"))
-                if not 0 < length <= 4096:
-                    raise ValueError("JSON body must be 1–4096 bytes")
-                body = json.loads(self.rfile.read(length))
+                body = json.loads(raw_body)
                 if not isinstance(body, dict):
                     raise ValueError("Expected JSON object")
-                if path == "/api/view":
+                if path == "/api/voice/input":
+                    device = body.get("device")
+                    if not isinstance(device, str) or len(device) > 512 or any(c in device for c in "\r\n\x00"):
+                        raise ValueError("device must be a microphone name")
+                    if voice_service is None:
+                        self._send_json(lambda: {"error": "Microphone selection unavailable"}, 503)
+                        return
+                    try:
+                        voice_service.select_microphone(device)
+                    except Exception as exc:
+                        code = 400 if isinstance(exc, ValueError) else 409 if isinstance(exc, RuntimeError) else 503
+                        self._send_json(lambda: {"error": str(exc)}, code)
+                        return
+                elif path == "/api/view":
                     view = body.get("view")
                     if not isinstance(view, str):
                         raise ValueError("view must be notes or case3")
@@ -92,6 +143,9 @@ def build_request_handler(
                 else:
                     state.reset_case3()
             except (ValueError, UnicodeError) as exc:
+                if path == "/api/voice/input":
+                    self._send_json(lambda: {"error": str(exc)}, 400)
+                    return
                 self.send_error(400, "Invalid command", explain=str(exc))
                 return
             self._send_json(state.as_json_data)
@@ -99,9 +153,14 @@ def build_request_handler(
         def log_message(self, format: str, *args: object) -> None:
             return
 
-        def _send_json(self, data_factory: Callable[[], dict[str, object]]) -> None:
+        def _local_host(self) -> bool:
+            return self.headers.get("Host") in {
+                f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}",
+            }
+
+        def _send_json(self, data_factory: Callable[[], dict[str, object]], status: int = 200) -> None:
             payload = json.dumps(data_factory(), ensure_ascii=False).encode("utf-8")
-            self.send_response(200)
+            self.send_response(status)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(payload)))
@@ -203,6 +262,27 @@ def render_dashboard_html() -> str:
     .transcript {
       overflow-wrap: anywhere;
     }
+    .grid > div { min-width: 0; overflow-wrap: anywhere; }
+    .mic-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto 42px; gap: 8px; margin: 12px 0; }
+    .mic-controls select {
+      min-width: 0; max-width: 100%; width: 100%;
+    }
+    .mic-controls select, .mic-controls button {
+      background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+      border-radius: 4px; padding: 8px; min-height: 42px;
+      font: inherit; font-size: 16px; letter-spacing: 0;
+    }
+    .mic-controls button { cursor: pointer; }
+    .mic-controls :disabled { opacity: 0.55; cursor: default; }
+    .mic-controls :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+    #mic-message { min-height: 1.4em; font-size: 16px; overflow-wrap: anywhere; }
+    #mic-message[data-error="true"] { color: var(--late); }
+    @media (max-width: 520px) {
+      .mic-controls { grid-template-columns: minmax(0, 1fr) 42px; }
+      .mic-controls select { grid-column: 1 / -1; }
+      #mic-apply { justify-self: start; }
+      .grid { grid-template-columns: minmax(100px, 0.8fr) minmax(0, 1.2fr); font-size: 16px; gap: 8px; }
+    }
     .support {
       border-top: 2px solid var(--border);
       margin-top: 22px;
@@ -225,8 +305,19 @@ def render_dashboard_html() -> str:
   </main>
   <section class="panel" aria-live="polite">
     <h2>VOICE</h2>
+    <form id="mic-form" class="mic-controls">
+      <select id="mic-select" aria-label="Input microphone" disabled>
+        <option>Loading microphones...</option>
+      </select>
+      <button id="mic-apply" type="submit" disabled>Use microphone</button>
+      <button id="mic-refresh" type="button" title="Refresh microphones" aria-label="Refresh microphones">&#8635;</button>
+    </form>
+    <div id="mic-message" role="status" aria-live="polite"></div>
     <div class="grid">
       <div class="label">VOICE STATUS</div><div id="voice-status">DISABLED</div>
+      <div class="label">MICROPHONE</div><div id="voice-input">-</div>
+      <div class="label">STT MODEL</div><div id="voice-model">-</div>
+      <div class="label">STT TIME</div><div id="voice-latency">-</div>
       <div class="label">PTT MODE</div><div id="voice-mode">-</div>
       <div class="label">JOY BACKEND</div><div id="voice-joy-backend">-</div>
       <div class="label">PTT</div><div id="voice-ptt">-</div>
@@ -254,6 +345,78 @@ def render_dashboard_html() -> str:
   </footer>
   <script>
     let latestRevision = -1;
+    let micBusy = false;
+    let micRecording = false;
+    let micSelected = null;
+    let micReady = false;
+
+    function micControls() {
+      document.getElementById("mic-select").disabled = micBusy || micRecording || !micReady;
+      document.getElementById("mic-apply").disabled = micBusy || micRecording || !micReady;
+      document.getElementById("mic-refresh").disabled = micBusy;
+    }
+
+    function micMessage(message, error = false) {
+      const element = document.getElementById("mic-message");
+      element.textContent = message;
+      element.dataset.error = String(error);
+    }
+
+    function selectCurrentMic(value) {
+      const select = document.getElementById("mic-select");
+      if (![...select.options].some(option => option.value === value)) {
+        select.add(new Option(value + " (not available)", value));
+      }
+      select.value = value;
+      micSelected = value;
+    }
+
+    async function loadMicrophones() {
+      micBusy = true;
+      micControls();
+      micMessage("Loading microphones...");
+      try {
+        const response = await fetch("/api/microphones", { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not load microphones");
+        const select = document.getElementById("mic-select");
+        select.replaceChildren();
+        for (const item of data.devices) select.add(new Option(item.label, item.value));
+        selectCurrentMic(data.selected);
+        micReady = true;
+        micMessage("");
+      } catch (error) {
+        micMessage(error.message, true);
+      } finally {
+        micBusy = false;
+        micControls();
+      }
+    }
+
+    document.getElementById("mic-refresh").addEventListener("click", loadMicrophones);
+    document.getElementById("mic-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (micBusy || micRecording || !micReady) return;
+      micBusy = true;
+      micControls();
+      micMessage("Changing microphone...");
+      try {
+        const response = await fetch("/api/voice/input", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device: document.getElementById("mic-select").value }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Microphone change failed");
+        selectCurrentMic(data.voice.selected_input);
+        renderVoice(data);
+        micMessage("Microphone saved");
+      } catch (error) {
+        micMessage(error.message, true);
+      } finally {
+        micBusy = false;
+        micControls();
+      }
+    });
 
     function render(data) {
       if (data.revision === latestRevision) {
@@ -331,10 +494,22 @@ def render_dashboard_html() -> str:
 
     function renderVoice(data) {
       const voice = data.voice || {};
+      micRecording = Boolean(voice.is_recording);
+      if (micReady && !micBusy && typeof voice.selected_input === "string" && voice.selected_input !== micSelected) {
+        selectCurrentMic(voice.selected_input);
+      }
+      micControls();
       const status = voice.status || "UNKNOWN";
       const statusEl = document.getElementById("voice-status");
       statusEl.textContent = voice.is_recording ? "RECORDING" : status;
+      if (voice.pending_count) {
+        statusEl.textContent += " (" + voice.pending_count + " pending)";
+      }
       statusEl.className = voice.is_recording ? "recording" : "";
+      document.getElementById("voice-input").textContent = voice.input_device || "-";
+      document.getElementById("voice-model").textContent = voice.last_model || voice.model || "-";
+      document.getElementById("voice-latency").textContent =
+        typeof voice.last_latency_seconds === "number" ? voice.last_latency_seconds.toFixed(2) + " s" : "-";
       document.getElementById("voice-mode").textContent = voice.ptt_mode || "-";
       document.getElementById("voice-joy-backend").textContent =
         voice.joystick_backend || "-";
@@ -374,11 +549,13 @@ def render_dashboard_html() -> str:
         renderDcsBios(data);
       } catch {
         document.getElementById("status").textContent = "SERVER UNAVAILABLE";
+      } finally {
+        setTimeout(refresh, 500);
       }
     }
 
     refresh();
-    setInterval(refresh, 1500);
+    loadMicrophones();
   </script>
 </body>
 </html>

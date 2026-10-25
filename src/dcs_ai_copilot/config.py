@@ -1,8 +1,34 @@
 from __future__ import annotations
 
 import configparser
+import os
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+
+
+def save_voice_input(config_file: Path, device: str) -> None:
+    """Read the latest settings and replace the file only after a complete write."""
+    parser = configparser.ConfigParser(interpolation=None)
+    with config_file.open(encoding="utf-8") as source:
+        parser.read_file(source)
+    if not parser.has_section("voice"):
+        parser.add_section("voice")
+    parser.set("voice", "input_device", device)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=config_file.parent,
+            prefix=".microphone-", suffix=".tmp", delete=False,
+        ) as target:
+            temporary = Path(target.name)
+            parser.write(target)
+            target.flush()
+            os.fsync(target.fileno())
+        os.replace(temporary, config_file)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 @dataclass(frozen=True)

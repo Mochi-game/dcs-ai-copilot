@@ -173,6 +173,8 @@ class JoystickPttListener:
                 is_pressed = bool(joystick.get_button(self._button))
             except Exception as exc:
                 joystick = None
+                if was_pressed:
+                    self._on_release()
                 was_pressed = False
                 self._on_status("JOYSTICK ERROR", str(exc))
                 time.sleep(1)
@@ -281,6 +283,8 @@ class WinmmJoystickPttListener:
                 is_pressed = is_winmm_button_pressed(buttons_mask, self._button)
             except Exception as exc:
                 device = None
+                if was_pressed:
+                    self._on_release()
                 was_pressed = False
                 self._on_status("JOYSTICK ERROR", str(exc))
                 time.sleep(1)

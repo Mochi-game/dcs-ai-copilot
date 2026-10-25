@@ -5,7 +5,7 @@ assignment-driven values, see [CASE3-GENERIC.md](CASE3-GENERIC.md).
 
 ## Tillägg 2026-09-26: DCS-klocka, varvsmätare, svängsignal, röstformer
 
-Byggt för MA CASE 3 v2.1.0 (`I:\Claudecode\ma-case3`). Hold-algoritmen
+Byggt för MA CASE 3 v2.1.0. Hold-algoritmen
 nedan är **oförändrad**: användaren bekräftade att svängarna alltid är
 2 min (4 min per 360°) och att en rest under 4 min förlänger sista varvet
 (8 min = ett varv med 2:00 raksträckor, aldrig två 4-minutersvarv).
@@ -35,10 +35,10 @@ Tester: `tests/test_case3_clock_gauge.py` (19 nya). Hela sviten 123 OK.
 Bladet granskat i 480×640 med syntetisk uppdragsklocka på port 8799:
 ryms utan scroll, varv 1 och 2, blinkande TURN INBOUND. **Inte testat
 skarpt i DCS**: att DCS-BIOS faktiskt skickar TIME_* till appen under
-flygning. Backup före ändring: `I:\Codex\DCS-AI-Copilot-backup-case3-v2-20260926-195700`.
+flygning.
 
 
-Implementerat 2026-09-14 i `I:\Codex\DCS-AI-Copilot`.
+Implementerat 2026-09-14 i DCS AI Copilot-projektet.
 
 ## Exakt algoritm
 
@@ -164,9 +164,8 @@ Tester/dokumentation:
 - Ny `docs/CASE3-HOLD-TIMELINE.md`: denna rapport.
 - `docs/CASE3-PHASE1.md`: märkt som historisk rapport med hänvisning hit.
 
-Backup av berörda befintliga filer före ändring:
-`I:\Codex\DCS-AI-Copilot-backup-hold-timeline-20260914-082417`.
-Tidigare lokala ändringar har behållits. PTT, audio capture, STT-providers,
+En lokal återställningspunkt skapades före ändringen.
+Tidigare lokala ändringar behölls. PTT, audio capture, STT-providers,
 note-lagring, koordinatparser och DCS-BIOS har inte ändrats i detta arbete.
 
 ## Testresultat och praktisk verifiering

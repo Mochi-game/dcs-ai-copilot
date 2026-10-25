@@ -14,8 +14,8 @@ Durable rules for anyone (human or agent) changing this project.
 - **Never `git reset --hard`, `git checkout -- .` or `git stash` without
   asking.** Most of the Case III work and several script edits are
   uncommitted working-tree changes. Before a change, make a restore point
-  next to the repo, as earlier work did:
-  `I:\Codex\DCS-AI-Copilot-backup-<topic>-<yyyymmdd-hhmmss>` with
+  next to the repo named
+  `DCS-AI-Copilot-backup-<topic>-<yyyymmdd-hhmmss>`, with
   `HEAD.txt`, `working-tree.patch` and a copy of tracked + untracked,
   non-ignored files.
 - Do not commit or push unless the user explicitly asks.
@@ -38,7 +38,7 @@ Durable rules for anyone (human or agent) changing this project.
 ## Architecture principles
 
 - `KneeboardState` is the single shared state; the web page polls
-  `/api/state` every 1.5 s.
+  `/api/state` 0.5 s after each completed response (no overlapping polls).
 - Voice: PTT → STT → `voice/router.py` (deterministic, raw transcript and
   note bodies are never normalized) → notes → coordinate parser fallback.
 - Case III timing (`case3.py`) is pure datetime/timedelta arithmetic in
@@ -53,8 +53,8 @@ Durable rules for anyone (human or agent) changing this project.
   examples require 11 min = 6+5 and 14 min = 7+7. For a remainder under
   2 min, lengthen the last lap; for 2–4 min, choose the feasible lap count
   closest to 6 min and distribute seconds evenly. Every final inbound ends
-  at the fix with no extra turn. Must match
-  `C3_HoldingPlan` in `I:\Claudecode\ma-case3\src\case3_module.lua`.
+  at the fix with no extra turn. It must continue to match the verified
+  `C3_HoldingPlan` reference used during CASE III validation.
 - Repeated spoken CROSSING replaces the previous hold-plan origin while
   keeping Push/EAT. Generic commencement requires spoken COMMENCING; time
   passing alone must never transition the phase.

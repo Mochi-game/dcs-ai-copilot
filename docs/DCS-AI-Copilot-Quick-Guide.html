@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DCS AI Copilot Quick Guide</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; color: #101820; font-family: Arial, sans-serif; }
+    .page { width: 210mm; height: 297mm; padding: 12mm; overflow: hidden; page-break-after: always;
+      display: flex; flex-direction: column; gap: 3mm; }
+    .page:last-child { page-break-after: auto; }
+    h1 { margin: 0; padding: 4mm; color: #fff; background: #0b2239; font-size: 22pt; letter-spacing: .5px; }
+    h2 { margin: 0; padding-bottom: 1.5mm; border-bottom: 2px solid #0b6e99; color: #0b2239; font-size: 16pt; }
+    h3 { margin: 0 0 1mm; font-size: 12.5pt; color: #0b2239; }
+    p, li, td, th { font-size: 11pt; line-height: 1.25; }
+    p { margin: 1mm 0; }
+    ul, ol { margin: 1mm 0 0 7mm; padding-left: 5mm; }
+    li { margin: 1mm 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 2mm; border: 1px solid #567; vertical-align: top; }
+    th { color: #fff; background: #0b6e99; text-align: left; }
+    .flow { padding: 4mm; border: 3px solid #0b6e99; background: #eaf7fc; text-align: center;
+      font-size: 22pt; font-weight: 800; letter-spacing: 1px; }
+    .say { color: #7a2500; font-weight: 800; }
+    .card { padding: 3mm; border-left: 5px solid #0b6e99; background: #f1f5f7; }
+    .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+    .step { padding: 3mm; border: 2px solid #9db7c4; border-radius: 3mm; }
+    .num { display: inline-grid; place-items: center; width: 9mm; height: 9mm; margin-right: 2mm;
+      border-radius: 50%; color: #fff; background: #0b6e99; font-weight: 700; }
+    .warning { padding: 2.5mm; border: 2px solid #a14b00; background: #fff3db; font-weight: 700; }
+    .small, .small li, .small td, .small th { font-size: 9.5pt; line-height: 1.2; }
+    .footer { margin-top: auto; padding-top: 2mm; border-top: 1px solid #789; font-size: 9pt; color: #456; }
+    code { font-family: Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <h1>DCS AI COPILOT — WHAT DO I SAY WHEN?</h1>
+    <div class="flow">EAT &rarr; CROSSING &rarr; COMMENCING</div>
+
+    <div class="steps">
+      <div class="step"><h3><span class="num">1</span>Marshal gives EAT</h3>
+        <p class="say">SAY: “EAT TWO ONE”</p>
+        <p>Stores the next <strong>:21</strong>. Full-time example: “EAT ONE FOUR TWO ONE”.</p></div>
+      <div class="step"><h3><span class="num">2</span>Cross marshal fix</h3>
+        <p class="say">SAY: “CROSSING”</p>
+        <p>Records now and calculates the hold to EAT. Say it again at a later crossing to replan.</p></div>
+      <div class="step"><h3><span class="num">3</span>Leave the hold</h3>
+        <p class="say">SAY: “COMMENCING”</p>
+        <p>Starts approach guidance. The clock reaching EAT does not commence automatically.</p></div>
+      <div class="step"><h3><span class="num">4</span>Check the plan</h3>
+        <p class="say">SAY: “CASE THREE STATUS”</p>
+        <p>Opens the CASE III page without changing the plan.</p></div>
+    </div>
+
+    <h2>Notes</h2>
+    <table>
+      <tr><th>Need</th><th>Say</th><th>Result</th></tr>
+      <tr><td>Save a reminder</td><td class="say">NOTE TANKER NORTH</td><td>Saves everything after NOTE</td></tr>
+      <tr><td>Show notes</td><td class="say">NOTES</td><td>Returns to notes/targets</td></tr>
+      <tr><td>Remove all notes</td><td class="say">CLEAR NOTES</td><td>CASE III is preserved</td></tr>
+    </table>
+    <div class="card"><strong>PTT:</strong> Hold &rarr; wait for <strong>RECORDING</strong> &rarr; speak the
+      whole phrase &rarr; release &rarr; check <strong>LAST TRANSCRIPT</strong> and <strong>LAST ERROR</strong>.</div>
+    <div class="warning">CLEAR CASE and CLEAR NOTES are different commands.</div>
+    <div class="footer">DCS AI Copilot v3.0.0 documentation · Full guide: docs/VOICE-COMMANDS.md</div>
+  </section>
+
+  <section class="page">
+    <h1>VOICE COMMAND QUICK REFERENCE</h1>
+    <table class="small">
+      <tr><th>Action</th><th>Primary phrase</th><th>Useful aliases</th></tr>
+      <tr><td>Open/check CASE III</td><td><strong>CASE THREE STATUS</strong></td><td>CASE THREE, CASE 3, CASE III, CASE TREE, CASE FREE, THIS THREE</td></tr>
+      <tr><td>Set EAT</td><td><strong>EAT THREE TWO</strong></td><td>E A T 14:32; assignment labels TIME, PUSH TIME, EXPECTED APPROACH TIME</td></tr>
+      <tr><td>Mark fix crossing</td><td><strong>CROSSING</strong></td><td>CROSSING NOW; in CASE III: MARSHAL, MARSHAL CROSS, MARSHAL CROSSING</td></tr>
+      <tr><td>Begin approach</td><td><strong>COMMENCING</strong></td><td>COMMENCE, COMMENCE NOW</td></tr>
+      <tr><td>Reset CASE III</td><td><strong>CLEAR CASE</strong></td><td>CLEAR CASE THREE, RESET CASE THREE, CLEAR CASE TREE</td></tr>
+      <tr><td>Manual PC-clock sync</td><td><strong>SYNC CLOCK 1421</strong></td><td>Digits may be spoken separately; only valid with PC time source</td></tr>
+      <tr><td>Create note</td><td><strong>NOTE &lt;text&gt;</strong></td><td>NOTERA, ANTECKNA, ANTECKNING</td></tr>
+      <tr><td>Show notes</td><td><strong>NOTES</strong></td><td>SHOW NOTES, BACK TO NOTES</td></tr>
+      <tr><td>Clear notes</td><td><strong>CLEAR NOTES</strong></td><td>CLEAR, CLEAR NOTE, RENSA, RENSA ANTECKNINGAR</td></tr>
+      <tr><td>Theme</td><td><strong>DAY MODE / NIGHT MODE</strong></td><td>DAYTIME / NIGHTTIME</td></tr>
+    </table>
+
+    <h2>Marshal assignment example</h2>
+    <div class="card small"><strong>SAY:</strong> “CASE THREE, MARSHAL TWO ZERO ZERO TWO TWO,
+      ANGELS SEVEN, TIME THREE TWO, BUTTON ONE FIVE, FINAL BEARING ONE SEVEN ZERO,
+      TACAN SEVEN TWO X, ICLS ONE.”</div>
+    <p class="small">Available labeled fields: radial/marshal, DME, angels, time/EAT,
+      button, final bearing/FB, TACAN and ICLS. Fields may be spoken separately.
+      Invalid fields are rejected rather than partially applied.</p>
+
+    <h2>Time source</h2>
+    <ul class="small">
+      <li><strong>MISSION:</strong> DCS-BIOS mission start + model time. It follows simulation time
+        and freezes when DCS is paused; no local extrapolation.</li>
+      <li><strong>PC:</strong> used until mission-time data arrives.</li>
+      <li><strong>MANUAL:</strong> with PC source only, “SYNC CLOCK HHMM” offsets CASE III without
+        changing Windows time.</li>
+      <li>If mission packets stop, the last mission reading remains selected and is marked not live;
+        Copilot does not silently switch to PC time.</li>
+    </ul>
+    <div class="footer">OpenKneeboard Web Dashboard: http://127.0.0.1:8765</div>
+  </section>
+
+  <section class="page">
+    <h1>MICROPHONE &amp; TROUBLESHOOTING</h1>
+    <h2>Select the input</h2>
+    <ol>
+      <li>Start DCS AI Copilot and open its dashboard.</li>
+      <li>In <strong>VOICE</strong>, select the desired physical microphone.</li>
+      <li>Press <strong>Use microphone</strong>.</li>
+      <li>Hold PTT and verify <strong>RECORDING</strong>.</li>
+      <li>Say “NOTE MICROPHONE TEST”, release, and check <strong>LAST TRANSCRIPT</strong>.</li>
+    </ol>
+    <p>The selection is saved by exact device name + Windows host API. It does not alter Windows,
+      SRS, Discord, DCS or VR audio settings.</p>
+
+    <h2>Which duplicate should I choose?</h2>
+    <p>MME, DirectSound, WASAPI and WDM-KS can be different Windows paths to the same physical
+      microphone. There is no universal requirement to use MME. Choose the correct physical name,
+      test it, and keep the entry that records reliably. A webcam is a common accidental default.</p>
+
+    <h2>Fast fault checks</h2>
+    <table class="small">
+      <tr><th>Problem</th><th>Check</th></tr>
+      <tr><td>Not listed</td><td>Windows Sound Input &rarr; dashboard refresh &rarr; restart Copilot with device connected</td></tr>
+      <tr><td>Wrong input</td><td>Select exact device + host API; do not rely on Windows default</td></tr>
+      <tr><td>Windows works, Copilot fails</td><td>Privacy permission, input level, exclusive use, another host-API entry, LAST ERROR</td></tr>
+      <tr><td>PTT but no transcript</td><td>RECORDING visible, speak after it appears, API key/quota/network, queue not full</td></tr>
+      <tr><td>Wrong words/numbers</td><td>Mic distance/noise, speak digits distinctly, check LAST TRANSCRIPT</td></tr>
+      <tr><td>Bluetooth changed</td><td>Re-select the currently listed headset/input profile</td></tr>
+      <tr><td>USB reconnected</td><td>Name-based UI choice usually survives; a manual numeric index may change</td></tr>
+    </table>
+
+    <div class="warning">No automatic microphone fallback. If the selected device is disconnected,
+      reconnect it or explicitly select another input.</div>
+    <div class="card small"><strong>Dashboard fields:</strong> selected MICROPHONE, VOICE STATUS,
+      STT MODEL/TIME, PTT state, LAST TRANSCRIPT, LAST ERROR, time source and CASE III state.</div>
+    <div class="footer">Detailed setup: docs/MICROPHONE-SETUP.md · Command list: docs/VOICE-COMMANDS.md</div>
+  </section>
+</body>
+</html>

@@ -3,7 +3,7 @@
 Historisk rapport för första implementationen. Hold-algoritmen, fasnedräkningen
 och reset-beteendet har därefter ersatts enligt [CASE3-HOLD-TIMELINE.md](CASE3-HOLD-TIMELINE.md).
 
-Implementerat 2026-09-13 i `I:\Codex\DCS-AI-Copilot`, inklusive NIGHT/DAY-tillägget.
+Implementerat 2026-09-13, inklusive NIGHT/DAY-tillägget.
 
 ## Inventering och restore point
 
@@ -11,8 +11,8 @@ Före ändring passerade 71 unittest-tester. Projektet hade redan lokala ändrin
 i start/stopp-skript, state, notes, PTT och PTT-tester samt två nya VBS-filer.
 Dessa ändringar bevarades.
 
-Restore point: `I:\Codex\DCS-AI-Copilot-backup-20260913-133944`.
-Den innehåller befintliga Git-spårade och icke-ignorerade filer, inklusive lokala
+En lokal återställningspunkt skapades före ändringen.
+Den innehöll befintliga Git-spårade och icke-ignorerade filer, inklusive lokala
 ändringar, samt `HEAD.txt` och `working-tree.patch`. Ignorerade runtimefiler,
 hemligheter, byggmiljö och distributionsfiler ingår inte. Inga sådana inställningar
 behöver återställas för att backa kodändringen. Återställ berörda källfiler från
@@ -145,7 +145,7 @@ Nedräkningen markeras otillgänglig om servern inte kan nås.
 Kör från PowerShell, med eventuell äldre instans stoppad:
 
 ```powershell
-Set-Location -LiteralPath 'I:\Codex\DCS-AI-Copilot'
+Set-Location -LiteralPath '<path-to-DCS-AI-Copilot>'
 python main.py
 ```
 

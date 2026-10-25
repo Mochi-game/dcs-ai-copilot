@@ -68,6 +68,10 @@ class KneeboardState:
             "joystick_status": "",
             "joystick_detail": "",
             "model": "",
+            "input_device": "",
+            "pending_count": 0,
+            "last_latency_seconds": None,
+            "last_model": "",
         }
 
     def next_index(self) -> int:
